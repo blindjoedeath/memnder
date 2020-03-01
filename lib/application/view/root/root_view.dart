@@ -10,6 +10,8 @@ import 'package:memnder/application/bloc/registration/registration_bloc.dart';
 import 'package:memnder/application/bloc/root/root_event.dart';
 import 'package:memnder/application/bloc/root/root_state.dart';
 import 'package:memnder/application/manager/route_manager.dart';
+import 'package:memnder/application/model/jwt_credentials.dart';
+import 'package:memnder/application/provider/secure_storage_provider.dart';
 import 'package:memnder/application/view/authentication/authentication_view.dart';
 import 'package:memnder/application/view/registration/registration_view.dart';
 
@@ -40,7 +42,8 @@ class _RootViewState extends State<RootView>{
       builder: (context, state){
         return Scaffold(
           body: index == 0 ? (
-            state.isAuthenticated ? Container() : AuthenticationView(
+            state.isAuthenticated ? Container() :
+             AuthenticationView(
               bloc: widget.authenticationBloc.instance
             )
           ) 

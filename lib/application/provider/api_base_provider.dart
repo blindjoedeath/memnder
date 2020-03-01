@@ -14,7 +14,8 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
   SecureStorageProviderInterface secureStorageProvider;
 
   Future init()async{
-    var jwt = await secureStorageProvider.load(SecureStorageKey.jwtCredentials);
+    var jwt = JwtCredentials();
+    jwt = await secureStorageProvider.load(SecureStorageKey.jwtCredentials, jwt);
     _isAuthenticated = jwt != null;
   }
 
@@ -29,13 +30,10 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
   }
 
   Future<ApiResponse> authenticate(String username, String password)async{
-    changeState(true);
-    return ApiSuccess(value: null);
-
-    var method = "/signin_and_signup/api/token";
+    var url = baseUrl + '/signin_and_signup/api/token/';
     var body = jsonEncode({"username": username,
                            "password" : password});
-    var response = await client.post(method, 
+    var response = await client.post(url, 
       headers: {"Content-Type": "application/json"},
       body: body
     );
@@ -70,11 +68,6 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
 
     @override
   Future<ApiResponse> createUser(String username, String password)async {
-
-    changeState(true);
-    return ApiSuccess(value: null);
-
-
     String url = baseUrl + '/signin_and_signup/api/createuser/';
     var body = jsonEncode({"username": username,
                            "password" : password});
@@ -92,7 +85,7 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
           username: username,
           password: password
         );
-        secureStorageProvider.save(SecureStorageKey.jwtCredentials, jwt);
+        await secureStorageProvider.save(SecureStorageKey.jwtCredentials, jwt);
         changeState(true);
         return ApiSuccess(
           value: reg
@@ -113,7 +106,7 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
 
   Future<ApiResponse> refreshToken(JwtCredentials jwt)async{
     var method = "/signin_and_signup/api/refresh";
-    var body = jsonEncode({"token": jwt.refreshToken});
+    var body = jsonEncode({"refresh": jwt.refreshToken});
     var response = await client.post(method, 
       headers: {"Content-Type": "application/json"},
       body: body
@@ -124,17 +117,17 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
     } else if (response.statusCode < 400){
       try{
         var json = jsonDecode(response.body);
-        var auth = AuthenticationApiModel.fromJson(json);
+        var access = json["access"];
         var newJwt = JwtCredentials(
-          accessToken: auth.access,
-          refreshToken: auth.refresh,
+          accessToken: access,
+          refreshToken: jwt.refreshToken,
           username: jwt.username,
           password: jwt.password
         );
-        secureStorageProvider.save(SecureStorageKey.jwtCredentials, newJwt);
+        await secureStorageProvider.save(SecureStorageKey.jwtCredentials, newJwt);
         changeState(true);
         return ApiSuccess(
-          value: auth
+          value: newJwt
         );
       }
       catch(e){
@@ -151,13 +144,18 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
   }
 
   Future<ApiResponse> authorizedRequestImpl(String method, Map<String, Object> parameters, {bool isFirst = true})async{
-    var jwt = await secureStorageProvider.load<JwtCredentials>(SecureStorageKey.jwtCredentials);
+    var jwt = JwtCredentials();
+    jwt = await secureStorageProvider.load<JwtCredentials>(SecureStorageKey.jwtCredentials, jwt);
     if (jwt == null){
       return CredentialsError();
     }
-    parameters["token"] = jwt.accessToken;
+
+    var token = jwt.accessToken;
     var response = await client.post(baseUrl + method, 
-      headers: {"Content-Type": "application/json"},
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer $token"
+      },
       body: jsonEncode(parameters)
     );
 

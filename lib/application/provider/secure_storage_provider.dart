@@ -1,24 +1,39 @@
 
+import 'dart:convert';
+import 'package:memnder/application/entity/codable/codable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum SecureStorageKey{
   jwtCredentials
 }
 
 abstract class SecureStorageProviderInterface{
-  Future<void> save<T>(SecureStorageKey key, T value);
-  Future<T> load<T>(SecureStorageKey key);
+  Future<bool> save<T extends Encodable>(SecureStorageKey key, T value);
+  Future<T> load<T extends Decodable>(SecureStorageKey key, T value);
 }
 
 class SecureStorageProvider extends SecureStorageProviderInterface{
 
   @override
-  Future<void> save<T>(SecureStorageKey key, T value){
-    
+  Future<bool> save<T extends Encodable>(SecureStorageKey key, T value)async{
+    var map = Map<String, dynamic>();
+    value.encodeToJson(map);
+    var json = jsonEncode(map);
+    var instance = await SharedPreferences.getInstance();
+
+    await instance.setString("$key", json);
   }
 
   @override
-  Future<T> load<T>(SecureStorageKey key){
-    
+  Future<T> load<T extends Decodable>(SecureStorageKey key, T value)async{
+    var instance = await SharedPreferences.getInstance();
+    var json = instance.getString("$key");
+    if (json == null){
+      return null;
+    }
+    var map = jsonDecode(json);
+    value.decodeFrom(map);
+    return value;
   }
 }
 
