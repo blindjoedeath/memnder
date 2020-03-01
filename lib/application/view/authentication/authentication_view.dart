@@ -42,7 +42,7 @@ class _AuthenticationViewState extends State<AuthenticationView>{
   }
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  void showEror(String message){
+  void showError(String message){
     WidgetsBinding.instance.addPostFrameCallback((d){
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -102,7 +102,7 @@ class _AuthenticationViewState extends State<AuthenticationView>{
         bloc: widget.bloc,
         builder: (context, state){
           if (state is AuthenticationError){
-            showEror(state.message);
+            showError(state.message);
           }
           return _buildForm(state);
         }

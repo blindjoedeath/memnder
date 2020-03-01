@@ -30,7 +30,7 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
   }
 
   Future<ApiResponse> authenticate(String username, String password)async{
-    var url = baseUrl + '/signin_and_signup/api/token/';
+    var url = baseUrl + '/api/signin_and_signup/token/';
     var body = jsonEncode({"username": username,
                            "password" : password});
     var response = await client.post(url, 
@@ -47,6 +47,7 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
           username: username,
           password: password
         );
+        print("authentication success");
         secureStorageProvider.save(SecureStorageKey.jwtCredentials, jwt);
         changeState(true);
         return ApiSuccess(
@@ -68,7 +69,7 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
 
     @override
   Future<ApiResponse> createUser(String username, String password)async {
-    String url = baseUrl + '/signin_and_signup/api/createuser/';
+    var url = baseUrl + '/api/signin_and_signup/createuser/';
     var body = jsonEncode({"username": username,
                            "password" : password});
     var response = await client.post(url, 
@@ -85,6 +86,7 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
           username: username,
           password: password
         );
+        print("registration success");
         await secureStorageProvider.save(SecureStorageKey.jwtCredentials, jwt);
         changeState(true);
         return ApiSuccess(
@@ -92,10 +94,12 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
         );
       }
       catch(e){
+        print("Autenticate error");
         changeState(false);
         return ApiError();
       }
     } else{
+      print("Autenticate error2");
       changeState(false);
       return ApiErrorDetail(
         message: jsonDecode(response.body)["detail"],
@@ -105,14 +109,16 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
   }
 
   Future<ApiResponse> refreshToken(JwtCredentials jwt)async{
-    var method = "/signin_and_signup/api/refresh";
+    var url = baseUrl + "/api/signin_and_signup/token/refresh/";
     var body = jsonEncode({"refresh": jwt.refreshToken});
-    var response = await client.post(method, 
+    var response = await client.post(url, 
       headers: {"Content-Type": "application/json"},
       body: body
     );
 
+    print(response.statusCode);
     if (response.statusCode == 401){
+      print(jwt.username + " " + jwt.password);
       return await authenticate(jwt.username, jwt.password);
     } else if (response.statusCode < 400){
       try{
@@ -143,20 +149,21 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
     }
   }
 
-  Future<ApiResponse> authorizedRequestImpl(String method, Map<String, Object> parameters, {bool isFirst = true})async{
+  Future<ApiResponse> authorizedGetRequestImpl(String method, {bool isFirst = true})async{
     var jwt = JwtCredentials();
     jwt = await secureStorageProvider.load<JwtCredentials>(SecureStorageKey.jwtCredentials, jwt);
     if (jwt == null){
+      print("jwt null");
       return CredentialsError();
     }
 
     var token = jwt.accessToken;
-    var response = await client.post(baseUrl + method, 
+    print("token: $token");
+    var response = await client.get(baseUrl + method, 
       headers: {
         "Content-Type": "application/json",
         "Authorization" : "Bearer $token"
       },
-      body: jsonEncode(parameters)
     );
 
     if (response.statusCode == 401){
@@ -164,7 +171,7 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
       if (isFirst){
         var authResponse = await refreshToken(jwt);
         if (authResponse is ApiSuccess){
-          return authorizedRequestImpl(method, parameters, isFirst: false);
+          return authorizedGetRequestImpl(method, isFirst: false);
         }
       } else {
         return ApiError();
@@ -177,8 +184,49 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
     } 
   }
 
-  Future<ApiResponse> authorizedRequest(String method, Map<String, Object> parameters)async{
-    return authorizedRequestImpl(method, parameters);
+
+  Future<ApiResponse> authorizedPostRequestImpl(String method, Map<String, Object> parameters, {bool isFirst = true})async{
+    var jwt = JwtCredentials();
+    jwt = await secureStorageProvider.load<JwtCredentials>(SecureStorageKey.jwtCredentials, jwt);
+    if (jwt == null){
+      print("jwt null");
+      return CredentialsError();
+    }
+
+    var token = jwt.accessToken;
+    print("token: $token");
+    var response = await client.post(baseUrl + method, 
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer $token"
+      },
+      body: parameters != null ? jsonEncode(parameters) : null
+    );
+
+    if (response.statusCode == 401){
+      print("UNAUTHORIZED");
+      if (isFirst){
+        var authResponse = await refreshToken(jwt);
+        if (authResponse is ApiSuccess){
+          return authorizedPostRequestImpl(method, parameters, isFirst: false);
+        }
+      } else {
+        return ApiError();
+      }
+    } else{
+      print("AUTHORIZED");
+      return ApiSuccess(
+        value: response
+      );
+    } 
+  }
+
+  Future<ApiResponse> authorizedGetRequest(String method)async{
+    return authorizedGetRequestImpl(method);
+  }
+
+  Future<ApiResponse> authorizedPostRequest(String method, Map<String, Object> parameters)async{
+    return authorizedPostRequestImpl(method, parameters); 
   }
 
 }

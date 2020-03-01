@@ -1,0 +1,6 @@
+
+
+enum MemeReaction{
+  like,
+  skip
+}

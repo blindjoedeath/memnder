@@ -1,11 +1,11 @@
-
-
 import 'package:dioc/src/container.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memnder/application/assembly/assembly.dart';
 import 'package:memnder/application/bloc/authentication/authentication_bloc.dart';
 import 'package:memnder/application/bloc/authentication/authentication_event.dart';
 import 'package:memnder/application/bloc/authentication/authentication_state.dart';
+import 'package:memnder/application/bloc/memes/memes_event.dart';
+import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/bloc/registration/registration_bloc.dart';
 import 'package:memnder/application/bloc/root/root_bloc.dart';
 import 'package:memnder/application/bloc/root/root_event.dart';
@@ -36,6 +36,7 @@ class RootViewAssembly extends ModuleAssembly<RootView>{
       return RootView(
         bloc: c.get(),
         authenticationBloc: c.getLazy<Bloc<AuthenticationEvent, AuthenticationState>>(),
+        memesBloc: c.getLazy<Bloc<MemesEvent, MemesState>>(),
       );
     });    
   }

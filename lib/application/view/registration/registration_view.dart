@@ -91,7 +91,7 @@ class _RegistrationViewState extends State<RegistrationView>{
   }
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  void showEror(String message){
+  void showError(String message){
     WidgetsBinding.instance.addPostFrameCallback((d){
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -113,7 +113,7 @@ class _RegistrationViewState extends State<RegistrationView>{
           if (state is RegistrationSuccess){
             routeToAccount();
           } else if (state is RegistrationError){
-            showEror(state.message);
+            showError(state.message);
           }
           return _buildForm(state);
         }

@@ -10,7 +10,6 @@ class RouteManager{
   }
 
   static Future prepareNamed(String route){
-    print("preparing");
     return _assembler.prepareNamed(route);
   }
 
