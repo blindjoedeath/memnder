@@ -47,16 +47,16 @@ class RegistrationValidator extends FormValidator<RegistrationField>{
       );
     }
 
-    if (password.length <= 6){
+    if (password.length < 6){
       return FormValidationError(
-        message: "Парол слишком маленький",
+        message: "Пароль слишком маленький",
         field: RegistrationField.password
       );
     }
 
     if (password.length > 100){
       return FormValidationError(
-        message: "Парол слишком большой",
+        message: "Пароль слишком большой",
         field: RegistrationField.password
       );
     }

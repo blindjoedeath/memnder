@@ -13,7 +13,7 @@ import 'package:memnder/application/view_model/authentication_view_model.dart';
 
 class AuthenticationView extends StatefulWidget{
 
-  final AuthenticationBloc bloc;
+  final Bloc<AuthenticationEvent, AuthenticationState> bloc;
 
   const AuthenticationView({@required this.bloc});
 
@@ -41,56 +41,72 @@ class _AuthenticationViewState extends State<AuthenticationView>{
     Navigator.pushNamed(context, "/registration");
   }
 
-  Widget _buildForm() {
-    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
-      bloc: widget.bloc,
-      builder: (context, state){
-        Map<AuthenticationField, String> errors = Map();
-        if (state is AuthenticationValidationError){
-          errors[state.field] = state.errorMessage;
-        }
-        return ListView(
-          children: <Widget>[
-            SizedBox(
-              height: 56,
-            ),
-            LoginTextField(
-              controller: _loginController,
-              error: errors[AuthenticationField.login],
-            ),
-            SizedBox(
-              height: 12,
-            ),
-            PasswordTextField(
-              controller: _passwordController,
-              error: errors[AuthenticationField.password],
-            ),
-            TextButton(
-              onPressed: _onRegister,
-              text: "Зарегистрироваться",
-            ),
-            SignButton(
-              onPressed: _onLogin,
-              title: "Войти",
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 46),
-              child: Center(
-                child: state is AuthenticationLoading ? CircularProgressIndicator()
-                                                     : Container()
-              )
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void showEror(String message){
+    WidgetsBinding.instance.addPostFrameCallback((d){
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text("Ошибка" + (message != null ? ": $message" : ""))
+        )
+      );
+    });
+  }
+
+  Widget _buildForm(AuthenticationState state) {
+      Map<AuthenticationField, String> errors = Map();
+      if (state is AuthenticationValidationError){
+        errors[state.field] = state.errorMessage;
+      }
+      return ListView(
+        children: <Widget>[
+          SizedBox(
+            height: 56,
+          ),
+          LoginTextField(
+            controller: _loginController,
+            error: errors[AuthenticationField.login],
+          ),
+          SizedBox(
+            height: 12,
+          ),
+          PasswordTextField(
+            controller: _passwordController,
+            error: errors[AuthenticationField.password],
+          ),
+          TextButton(
+            onPressed: _onRegister,
+            text: "Зарегистрироваться",
+          ),
+          SignButton(
+            onPressed: _onLogin,
+            title: "Войти",
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 46),
+            child: Center(
+              child: state is AuthenticationLoading ? CircularProgressIndicator()
+                                                    : Container()
             )
-          ],
-        );
-      },
-    );
+          )
+        ],
+      );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(title: Text("Аутентификация"),),
-      body: _buildForm(),
+      body: BlocBuilder<Bloc<AuthenticationEvent, AuthenticationState>, AuthenticationState>(
+        bloc: widget.bloc,
+        builder: (context, state){
+          if (state is AuthenticationError){
+            showEror(state.message);
+          }
+          return _buildForm(state);
+        }
+      )
     );
   }
 

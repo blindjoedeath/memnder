@@ -20,3 +20,15 @@ class RegistrationAttempt extends RegistrationEvent{
   List<Object> get props => [registration];
 
 }
+
+class Registrated extends RegistrationEvent{}
+
+class ReceivedError extends RegistrationEvent{
+  final String message;
+
+  ReceivedError(
+    {
+      @required this.message
+    }
+  );
+}

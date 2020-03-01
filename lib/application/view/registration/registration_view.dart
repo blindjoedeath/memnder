@@ -11,7 +11,7 @@ import 'package:memnder/application/view_model/registration_view_model.dart';
 
 class RegistrationView extends StatefulWidget{
 
-  final RegistrationBloc bloc;
+  final Bloc<RegistrationEvent, RegistrationState> bloc;
 
   const RegistrationView({@required this.bloc});
 
@@ -37,63 +37,87 @@ class _RegistrationViewState extends State<RegistrationView>{
     ));
   }
 
-  Widget _buildForm() {
-    return BlocBuilder<RegistrationBloc, RegistrationState>(
-      bloc: widget.bloc,
-      builder: (context, state){
-        Map<RegistrationField, String> errors = Map();
-        if (state is RegistrationValidationError){
-          errors[state.field] = state.errorMessage;
-        }
-        return ListView(
-          children: <Widget>[
-            SizedBox(
-              height: 56,
-            ),
-            LoginTextField(
-              controller: _loginController,
-              error: errors[RegistrationField.login],
-            ),
-            SizedBox(
-              height: 12,
-            ),
-            PasswordTextField(
-              controller: _passwordController,
-              error: errors[RegistrationField.password],
-            ),
-            SizedBox(
-              height: 12,
-            ),
-            PasswordTextField(
-              controller: _password2Controller,
-              title: "Повторите пароль",
-              error: errors[RegistrationField.passwordConfirmation],
-            ),
-            SizedBox(
-              height: 12,
-            ),
-            SignButton(
-              onPressed: _onLogin,
-              title: "Зарегистрироваться",
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 46),
-              child: Center(
-                child: state is RegistrationLoading ? CircularProgressIndicator()
-                                                     : Container()
-              )
-            )
-          ],
-        );
-      },
+  Widget _buildForm(RegistrationState state) {
+    Map<RegistrationField, String> errors = Map();
+    if (state is RegistrationValidationError){
+      errors[state.field] = state.errorMessage;
+    }
+    return ListView(
+      children: <Widget>[
+        SizedBox(
+          height: 56,
+        ),
+        LoginTextField(
+          controller: _loginController,
+          error: errors[RegistrationField.login],
+        ),
+        SizedBox(
+          height: 12,
+        ),
+        PasswordTextField(
+          controller: _passwordController,
+          error: errors[RegistrationField.password],
+        ),
+        SizedBox(
+          height: 12,
+        ),
+        PasswordTextField(
+          controller: _password2Controller,
+          title: "Повторите пароль",
+          error: errors[RegistrationField.passwordConfirmation],
+        ),
+        SizedBox(
+          height: 12,
+        ),
+        SignButton(
+          onPressed: _onLogin,
+          title: "Зарегистрироваться",
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 46),
+          child: Center(
+            child: state is RegistrationLoading ? CircularProgressIndicator()
+                                                  : Container()
+          )
+        )
+      ],
     );
+  }
+
+  void routeToAccount(){
+    WidgetsBinding.instance.addPostFrameCallback((d){
+      Navigator.pop(context);
+    });
+  }
+
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void showEror(String message){
+    WidgetsBinding.instance.addPostFrameCallback((d){
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text("Ошибка" + (message != null ? ": $message" : ""))
+        )
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(title: Text("Регистрация"),),
-      body: _buildForm(),
+      body: BlocBuilder<Bloc<RegistrationEvent, RegistrationState>, RegistrationState>(
+        bloc: widget.bloc,
+        builder: (context, state){ 
+          if (state is RegistrationSuccess){
+            routeToAccount();
+          } else if (state is RegistrationError){
+            showEror(state.message);
+          }
+          return _buildForm(state);
+        }
+      )
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memnder/application/mapper/mapper.dart';
 import 'package:memnder/application/model/registration_model.dart';
+import 'package:memnder/application/model/service_response.dart';
 import 'package:memnder/application/service/registration_service.dart';
 import 'package:memnder/application/validator/form_validator.dart';
 import 'package:memnder/application/validator/registration_validator.dart';
@@ -32,11 +33,38 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState>{
 
   RegistrationState get initialState => RegistrationState();
 
+  void register(RegistrationViewModel viewModel)async{
+    var model = mapper.mapToModel(viewModel);
+    var response = await registrationService.register(model);
+
+    if (response is Success){
+      add(Registrated());
+    } else if (response is Error){
+      add(ReceivedError(
+        message: response.message
+      ));
+    }
+  }
+
   @override
   Stream<RegistrationState> mapEventToState(RegistrationEvent event) async* {
     if (event is RegistrationAttempt){
       yield* _mapRegistrationAttemt(event);
+    } else if (event is Registrated){
+      yield* _mapRegistrated(event);
+    } else if (event is ReceivedError){
+      yield* _mapReceivedError(event);
     }
+  }
+
+    Stream<RegistrationState> _mapReceivedError(ReceivedError event) async*{
+    yield RegistrationError(
+      message: event.message
+    );
+  }
+
+  Stream<RegistrationState> _mapRegistrated(Registrated event) async*{
+    yield RegistrationSuccess();
   }
 
   Stream<RegistrationState> _mapRegistrationAttemt(RegistrationAttempt event) async*{
@@ -53,6 +81,7 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState>{
       );
     } else if (response is FormValidationSuccess){
       yield RegistrationLoading();
+      register(event.registration);
     }
   }
 

@@ -1,5 +1,5 @@
 import 'package:dioc/dioc.dart';
-import 'package:memnder/application/entity/lazy/lazy.dart';
+import 'package:memnder/application/entity/lazy.dart';
 
 extension LazyInjection on Container{
 

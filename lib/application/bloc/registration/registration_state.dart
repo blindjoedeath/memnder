@@ -26,3 +26,15 @@ class RegistrationValidationError extends RegistrationState{
 }
 
 class RegistrationLoading extends RegistrationState{}
+
+class RegistrationSuccess extends RegistrationState{}
+
+class RegistrationError extends RegistrationState{
+  final String message;
+
+  const RegistrationError(
+    {
+      this.message
+    }
+  );
+}

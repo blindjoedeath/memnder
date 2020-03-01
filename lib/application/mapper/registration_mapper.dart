@@ -11,7 +11,6 @@ class RegistrationMapper extends Mapper<RegistrationModel, RegistrationViewModel
     return RegistrationModel(
       login: viewModel.login,
       password: viewModel.password,
-      passwordConfirmation: viewModel.passwordConfirmation
     );
   }
 

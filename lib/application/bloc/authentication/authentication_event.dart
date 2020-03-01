@@ -20,3 +20,15 @@ class AuthenticationAttempt extends AuthenticationEvent{
   List<Object> get props => [authentication];
 
 }
+
+class Authenticated extends AuthenticationEvent{}
+
+class ReceivedError extends AuthenticationEvent{
+  final String message;
+
+  ReceivedError(
+    {
+      @required this.message
+    }
+  );
+}

@@ -8,6 +8,9 @@ import 'package:memnder/application/assembly/mapper/registration_mapper_assembly
 import 'package:memnder/application/assembly/module/authentication_assembly.dart';
 import 'package:memnder/application/assembly/module/registration_assembly.dart';
 import 'package:memnder/application/assembly/module/root_assembly.dart';
+import 'package:memnder/application/assembly/provider/api_base_provider_assembly.dart';
+import 'package:memnder/application/assembly/provider/secure_storage_provider_assembly.dart';
+import 'package:memnder/application/assembly/service/authentication_service_assembly.dart';
 import 'package:memnder/application/assembly/service/registration_service_assembly.dart';
 import 'package:memnder/application/assembly/validator/authentication_validator.dart';
 import 'package:memnder/application/assembly/validator/registration_validator_assembly.dart';
@@ -21,8 +24,14 @@ class Assembler{
     "/authentication" : AuthenticationAssembly()
   };
 
+  List<Assembly> providers = [
+    SecureStorageProviderAssembly(),
+    ApiBaseProviderAssembly(),
+  ];
+
   List<Assembly> services = [
-    RegistrationServiceAssembly()
+    RegistrationServiceAssembly(),
+    AuthenticationServiceAssembly()
   ];
 
   List<Assembly> mappers = [
@@ -41,6 +50,10 @@ class Assembler{
   Map<String, Widget Function(BuildContext)> generateRoutes(){
 
     container = Container();
+
+    providers .forEach((value){
+      value.assemble(container);
+    });
 
     services.forEach((value){
       value.assemble(container);
