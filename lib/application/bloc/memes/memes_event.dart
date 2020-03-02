@@ -37,3 +37,9 @@ class MemeAlert extends MemesEvent{
 
   const MemeAlert({@required this.message});
 }
+
+class AuthenticationChanged extends MemesEvent{
+  final bool state;
+
+  const AuthenticationChanged({@required this.state});
+}

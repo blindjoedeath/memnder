@@ -16,10 +16,15 @@ class SecureStorageProvider extends SecureStorageProviderInterface{
 
   @override
   Future<bool> save<T extends Encodable>(SecureStorageKey key, T value)async{
+    var instance = await SharedPreferences.getInstance();
+    
+    if(value == null){
+      return await instance.setString("$key", null);
+    }
+
     var map = Map<String, dynamic>();
     value.encodeToJson(map);
     var json = jsonEncode(map);
-    var instance = await SharedPreferences.getInstance();
 
     await instance.setString("$key", json);
   }

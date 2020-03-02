@@ -29,6 +29,11 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
     notifyListeners();
   }
 
+  void logout()async{
+    changeState(false);
+    secureStorageProvider.save(SecureStorageKey.jwtCredentials, null);
+  }
+
   Future<ApiResponse> authenticate(String username, String password)async{
     var url = baseUrl + '/api/signin_and_signup/token/';
     var body = jsonEncode({"username": username,

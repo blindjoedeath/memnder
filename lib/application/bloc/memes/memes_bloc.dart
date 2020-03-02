@@ -19,7 +19,21 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
       @required this.authenticationService,
       @required this.memeService
     }
-  );
+  ) {
+    authenticationService.addListener(authListener);
+  }
+
+  void authListener(){
+    add(AuthenticationChanged(
+      state: authenticationService.isAuthenticated
+    ));
+  }
+
+  @override
+  Future<void> close() {
+    authenticationService.removeListener(authListener);
+    return super.close();
+  }
 
   void getMeme()async{
     var response = await memeService.getMeme();
@@ -38,11 +52,11 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
   void setMemeReaction(int memeId, MemeReaction reaction)async{
     var response = await memeService.setMemeReaction(memeId, reaction);
     
-    if (response is Error){
-      add(MemeError(
-        message: response.message
-      ));
-    }
+    // if (response is Error){
+    //   add(MemeError(
+    //     message: response.message
+    //   ));
+    // }
   }
 
   MemesState get initialState => authenticationService.isAuthenticated ?
@@ -60,7 +74,13 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
       yield* _mapMemeError(event);
     } else if (event is MemeAlert){
       yield* _mapMemeAlert(event);
+    } else if (event is AuthenticationChanged){
+      yield* _mapAuthenticationChanged(event);
     }
+  }
+
+  Stream<MemesState> _mapAuthenticationChanged(AuthenticationChanged event)async*{
+    yield event.state ? Initial() : Unauthenticated();
   }
 
   Stream<MemesState> _mapMemeAlert(MemeAlert event)async*{

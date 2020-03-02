@@ -6,6 +6,7 @@ import 'package:memnder/application/bloc/memes/memes_event.dart';
 import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/entity/meme_reaction.dart';
 import 'package:memnder/application/model/meme_model.dart';
+import 'package:memnder/application/view/shared/animation/fly_animation.dart';
 
 class MemesView extends StatefulWidget{
 
@@ -18,32 +19,57 @@ class MemesView extends StatefulWidget{
   
 }
 
-class _MemesViewState extends State<MemesView>{
+class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMixin{
 
   MemeModel meme;
+  FlyAnimationController _flyController;
+
+  @override
+  void initState(){
+    super.initState();
+
+    _flyController = FlyAnimationController(
+      vsync: this
+    );
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+
+    _flyController.dispose();
+  }
+
+  void _setReaction(MemeReaction reaction)async{
+
+    _flyController.direction = FlyAnimationDirection.left;
+    if (reaction == MemeReaction.like){
+      _flyController.direction = FlyAnimationDirection.right;
+    }
+    var animation = _flyController.forward();
+
+    widget.bloc.add(MemeReactionSet(
+      meme: meme,
+      reaction: reaction
+    ));
+    await animation;
+    _flyController.reset();
+    setState(() {});
+  }
+
 
   Widget _buildFloatingRow(){
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         FloatingActionButton.extended(
-          onPressed: () {
-            widget.bloc.add(MemeReactionSet(
-              meme: meme,
-              reaction: MemeReaction.skip
-            ));
-          },
+          onPressed: () => _setReaction(MemeReaction.skip),
           label: Text('Пропустить'),
           icon: Icon(Icons.navigate_next),
           backgroundColor: Colors.black45
         ),
         FloatingActionButton.extended(
-          onPressed: () {
-            widget.bloc.add(MemeReactionSet(
-              meme: meme,
-              reaction: MemeReaction.like
-            ));
-          },
+          onPressed: () => _setReaction(MemeReaction.like),
           label: Text('   Лайк   '),
           icon: Icon(Icons.thumb_up),
           backgroundColor: Colors.green,
@@ -53,27 +79,31 @@ class _MemesViewState extends State<MemesView>{
   }
 
   Widget _buildImage(String link){
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Image.network(
-        link,
-        filterQuality: FilterQuality.high,
-        fit: BoxFit.fitWidth,
-      ),
+    return FlyAnimation(
+      controller: _flyController,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          link,
+          filterQuality: FilterQuality.high,
+          fit: BoxFit.fitWidth,
+        ),
+      )
     );
   }
 
   Widget _buildText(String text){
     return Text(text, 
       style: Theme.of(context).textTheme.display1,
-    );
+    ); 
   }
 
   Widget _buildBody(MemesState state){
     return Center(
       child: Padding(
         padding: EdgeInsets.only(top: 24, right: 12, left: 12, bottom: 88),
-        child: (state is ShowMeme ? _buildImage(state.meme.imageLink) : 
+        child:  (state is ShowMeme ? _buildImage(state.meme.imageLink) : 
+                (state is Loading && _flyController.isAnimating) ? _buildImage(meme.imageLink) : 
                 (state is Loading) ? CircularProgressIndicator() : 
                 (state is Unauthenticated ? _buildText("Авторизуйтесь") : 
                 (state is ShowAlert ? _buildText(state.message) : null))),

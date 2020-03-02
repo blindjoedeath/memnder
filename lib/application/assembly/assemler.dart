@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide Container;
 import 'package:memnder/application/assembly/assembly.dart';
 import 'package:memnder/application/assembly/mapper/authentication_mapper_assemly.dart';
 import 'package:memnder/application/assembly/mapper/registration_mapper_assembly.dart';
+import 'package:memnder/application/assembly/module/account_assembly.dart';
 import 'package:memnder/application/assembly/module/authentication_assembly.dart';
 import 'package:memnder/application/assembly/module/memes_assembly.dart';
 import 'package:memnder/application/assembly/module/registration_assembly.dart';
@@ -23,7 +24,8 @@ class Assembler{
     "/" : RootViewAssembly(),
     "/registration" : RegistrationAssembly(),
     "/authentication" : AuthenticationAssembly(),
-    "/memes" : MemesAssembly()
+    "/memes" : MemesAssembly(),
+    "/account" : AccountAssembly()
   };
 
   List<Assembly> providers = [

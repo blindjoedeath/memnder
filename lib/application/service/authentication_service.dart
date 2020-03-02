@@ -13,6 +13,7 @@ import 'package:memnder/application/provider/secure_storage_provider.dart';
 
 abstract class AuthenticationServiceInterface extends ChangeNotifier implements Initable{
   Future<ServiceResponse> authenticate(AuthenticationModel authentication);
+  void logout();
 
   bool get isAuthenticated;
 }
@@ -39,6 +40,10 @@ class AuthenticationService extends AuthenticationServiceInterface{
   @override
   bool get isAuthenticated{
     return apiBaseProvider.isAuthenticated;
+  }
+
+  void logout(){
+    apiBaseProvider.logout();
   }
 
   @override

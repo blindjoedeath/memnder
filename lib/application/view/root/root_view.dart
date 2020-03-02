@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:memnder/application/bloc/account/account_event.dart';
+import 'package:memnder/application/bloc/account/account_state.dart';
 import 'package:memnder/application/bloc/memes/memes_event.dart';
 import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/entity/lazy.dart';
@@ -12,6 +14,7 @@ import 'package:memnder/application/bloc/root/root_state.dart';
 import 'package:memnder/application/manager/route_manager.dart';
 import 'package:memnder/application/model/jwt_credentials.dart';
 import 'package:memnder/application/provider/secure_storage_provider.dart';
+import 'package:memnder/application/view/account/account_view.dart';
 import 'package:memnder/application/view/authentication/authentication_view.dart';
 import 'package:memnder/application/view/memes/memes_view.dart';
 import 'package:memnder/application/view/registration/registration_view.dart';
@@ -19,13 +22,16 @@ import 'package:memnder/application/view/registration/registration_view.dart';
 class RootView extends StatefulWidget{ 
   final Lazy<Bloc<AuthenticationEvent, AuthenticationState>> authenticationBloc;
   final Lazy<Bloc<MemesEvent, MemesState>> memesBloc;
+  final Lazy<Bloc<AccountEvent, AccountState>> accountBloc;
+
   final  Bloc<RootEvent, RootState> bloc;
 
   const RootView(
     {
       @required this.bloc,
       @required this.authenticationBloc,
-      @required this.memesBloc
+      @required this.memesBloc,
+      @required this.accountBloc
     }
   );
 
@@ -36,12 +42,13 @@ class RootView extends StatefulWidget{
 
 class _RootViewState extends State<RootView>{
 
-  int index = 1;
+  int index = 0;
+  bool isAuthenticated;
 
-  Widget _buildFirstTab(bool isAuthenticated){
+  Widget _buildFirstTab(){
     if (isAuthenticated){
-      return Container(
-        child: Text("Authenticated")
+      return AccountView(
+        bloc: widget.accountBloc.instance
       );
     } else{
       return AuthenticationView(
@@ -61,17 +68,17 @@ class _RootViewState extends State<RootView>{
   void initState(){
     super.initState();
 
-    var isAuthenticated = widget.bloc.initialState.isAuthenticated;
-    _onTap(isAuthenticated, index);
+    isAuthenticated = widget.bloc.initialState.isAuthenticated;
+    _onTap(index);
 
   }
 
   Widget _currentBody;
 
-  void _onTap(bool isAuthenticated, int i)async{
+  void _onTap(int i)async{
     index = i;
     if (index == 0){
-      _currentBody = _buildFirstTab(isAuthenticated);
+      _currentBody = _buildFirstTab();
     } else {
       _currentBody = await _buildSecondTab();
     }
@@ -83,11 +90,18 @@ class _RootViewState extends State<RootView>{
     return BlocBuilder<Bloc<RootEvent, RootState>, RootState>(
       bloc: widget.bloc,
       builder: (context, state){
+        if (isAuthenticated != state.isAuthenticated){
+          isAuthenticated = state.isAuthenticated;
+          WidgetsBinding.instance.addPostFrameCallback((d){
+            _onTap(index);
+          });
+        }
+        isAuthenticated = state.isAuthenticated;
         return Scaffold(
           body: _currentBody,
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: index,
-            onTap: (i) => _onTap(state.isAuthenticated, i),
+            onTap: (i) => _onTap(i),
             items: [
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_circle),
