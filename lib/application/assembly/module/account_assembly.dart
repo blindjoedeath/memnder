@@ -24,10 +24,9 @@ class AccountAssembly extends ModuleAssembly<AccountView>{
 
     container.registerBuilder<AccountView>((context, c){
       return AccountView(
-        bloc: c.get(),
+        bloc: c.create(),
       );
     });
-
   }
 
 }

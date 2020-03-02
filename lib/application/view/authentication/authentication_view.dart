@@ -38,7 +38,7 @@ class _AuthenticationViewState extends State<AuthenticationView>{
   }
 
   void _onRegister()async{
-    Navigator.pushNamed(context, "/registration");
+    await Navigator.of(context).pushNamed("/registration");
   }
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();

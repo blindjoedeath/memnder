@@ -37,7 +37,7 @@ class RootViewAssembly extends ModuleAssembly<RootView>{
     container.registerBuilder<RootView>((context, c){
       
       return RootView(
-        bloc: c.get(),
+        bloc: c.create(),
         authenticationBloc: c.getLazy<Bloc<AuthenticationEvent, AuthenticationState>>(),
         memesBloc: c.getLazy<Bloc<MemesEvent, MemesState>>(),
         accountBloc: c.getLazy<Bloc<AccountEvent, AccountState>>(),

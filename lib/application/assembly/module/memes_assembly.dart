@@ -26,7 +26,7 @@ class MemesAssembly extends ModuleAssembly<MemesView>{
 
     container.registerBuilder<MemesView>((context, container){
       return MemesView(
-        bloc: container.get(),
+        bloc: container.create(),
       );
     });
 

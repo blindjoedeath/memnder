@@ -24,10 +24,17 @@ class RegistrationAssembly extends ModuleAssembly<RegistrationView>{
 
     container.registerBuilder<RegistrationView>((context, container){
       return RegistrationView(
-        bloc: container.get(),
+        bloc: container.create(),
       );
     });
 
+  }
+
+
+  @override
+  void unload(Container container) {
+    var bloc = container.get<Bloc<RegistrationEvent, RegistrationState>>();
+    bloc.close();
   }
 
 }

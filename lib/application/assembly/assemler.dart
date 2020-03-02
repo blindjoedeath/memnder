@@ -86,4 +86,9 @@ class Assembler{
     return routes[route].prepare(container);
   }
 
+  void unloadNamed(String route){
+    var assembly = routes[route];
+    assembly.unload(container);
+  }
+
 }

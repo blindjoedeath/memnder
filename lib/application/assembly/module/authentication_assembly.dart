@@ -32,7 +32,7 @@ class AuthenticationAssembly extends ModuleAssembly<AuthenticationView>{
 
     container.registerBuilder<AuthenticationView>((context, c){
       return AuthenticationView(
-        bloc: c.get(),
+        bloc: c.create(),
       );
     });
 

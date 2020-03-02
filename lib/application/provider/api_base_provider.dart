@@ -170,7 +170,7 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
         "Authorization" : "Bearer $token"
       },
     );
-
+    print(response.body);
     if (response.statusCode == 401){
       print("UNAUTHORIZED");
       if (isFirst){

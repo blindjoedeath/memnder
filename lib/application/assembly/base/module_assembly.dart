@@ -19,6 +19,8 @@ abstract class ModuleAssembly<T extends Widget> extends Assembly{
     });
   }
 
+  void unload(Container container){}
+
   T getView(BuildContext context, Container container){
     return container.getWidget<T>(context);
   }

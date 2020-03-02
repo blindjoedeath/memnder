@@ -46,7 +46,6 @@ class _FlyAnimationState extends State<FlyAnimation> with SingleTickerProviderSt
   CurvedAnimation _curve;
 
   Animation<Offset> get _slideAnimation{
-    print(widget.controller.direction);
     double sign = widget.controller.direction == FlyAnimationDirection.left ? -1 : 1;
     return Tween<Offset>(
       begin: const Offset(0, 0),

@@ -109,7 +109,8 @@ class _RegistrationViewState extends State<RegistrationView>{
       appBar: AppBar(title: Text("Регистрация"),),
       body: BlocBuilder<Bloc<RegistrationEvent, RegistrationState>, RegistrationState>(
         bloc: widget.bloc,
-        builder: (context, state){ 
+        builder: (context, state){
+          print(state); 
           if (state is RegistrationSuccess){
             routeToAccount();
           } else if (state is RegistrationError){

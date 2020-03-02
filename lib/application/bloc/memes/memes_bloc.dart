@@ -51,12 +51,13 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
 
   void setMemeReaction(int memeId, MemeReaction reaction)async{
     var response = await memeService.setMemeReaction(memeId, reaction);
-    
-    // if (response is Error){
-    //   add(MemeError(
-    //     message: response.message
-    //   ));
-    // }
+    /*
+    if (response is Error){
+       add(MemeError(
+         message: response.message
+       ));
+    }
+    */
   }
 
   MemesState get initialState => authenticationService.isAuthenticated ?

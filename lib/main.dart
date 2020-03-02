@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
 
     var assembler = Assembler();
 
+    RouteObserver.inject(assembler);
     RouteManager.inject(assembler);
     var routes = assembler.generateRoutes();
 
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done){
           return MaterialApp(
             title: 'Memnder',
-            initialRoute: "/",
+            navigatorObservers: [RouteObserver()],
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
@@ -39,4 +40,33 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+}
+
+class RouteObserver extends NavigatorObserver{
+
+  static Assembler _assembler;
+
+  static void inject(Assembler assembler){
+    _assembler = assembler;
+  }
+
+  @override
+  void didPop(Route route, Route previousRoute) {
+    print(route.settings.name);
+    _assembler.unloadNamed(route.settings.name);
+    super.didPop(route, previousRoute);
+  }
+
+  @override
+  void didRemove(Route route, Route previousRoute) {
+    print("Did remove");
+    super.didRemove(route, previousRoute);
+  }
+
+  @override
+  void didReplace({Route newRoute, Route oldRoute}) {
+    print("did replace");
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+
 }
