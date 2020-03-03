@@ -1,5 +1,7 @@
 
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memnder/application/bloc/memes/memes_event.dart';
@@ -24,9 +26,13 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   MemeModel meme;
   FlyAnimationController _flyController;
   ValueNotifier<bool> _imageFullyLoaded = ValueNotifier(false);
-  bool _isLoadingNullFirstTime = false;
+  bool _isLoadingWasNull = false;
 
   void _setImageLoaded(bool state){
+    if (state){
+      _isLoadingWasNull = false;
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((r){
       _imageFullyLoaded.value = state;
       _imageFullyLoaded.notifyListeners();
@@ -92,13 +98,12 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
         child: Image.network(
           link,
           filterQuality: FilterQuality.high,
-          fit: BoxFit.fitWidth,
+          fit: BoxFit.fitWidth, 
           loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
             if (loadingProgress == null){
-              if (!_isLoadingNullFirstTime){
-                _isLoadingNullFirstTime = true;
+              if (!_isLoadingWasNull){
+                _isLoadingWasNull = true;
               } else {
-                _isLoadingNullFirstTime = false;
                 _setImageLoaded(true);
               }
               return child;

@@ -20,6 +20,8 @@ class MyApp extends StatelessWidget {
     RouteManager.inject(assembler);
     var routes = assembler.generateRoutes();
 
+    test();
+
     return FutureBuilder(
       future: RouteManager.prepareNamed("/"),
       builder: (context, snapshot){
@@ -40,6 +42,30 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+}
+
+abstract class Service{
+}
+
+class Service1 extends Service {
+  Service1(){
+    print("initing $this");
+  }
+}
+
+class Service2 extends Service {
+  Service2(){
+    print("initing $this");
+  }
+}
+
+test(){
+
+  var container = dioc.Container();
+  container.register<Service>((c) => Service1());
+
+  Service s1 = container.create();
+
 }
 
 class RouteObserver extends NavigatorObserver{

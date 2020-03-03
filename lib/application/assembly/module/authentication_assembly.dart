@@ -18,6 +18,8 @@ import 'package:memnder/application/view_model/authentication_view_model.dart';
 
 class AuthenticationAssembly extends ModuleAssembly<AuthenticationView>{
 
+  Bloc<AuthenticationEvent, AuthenticationState> _authenticationBloc;
+
   @override
   void assemble(Container container) {
 
@@ -36,14 +38,14 @@ class AuthenticationAssembly extends ModuleAssembly<AuthenticationView>{
 
     container.registerBuilder<AuthenticationView>((context, c){
       return AuthenticationView(
-        bloc: c.create<Bloc<AuthenticationEvent, AuthenticationState>>(),
+        bloc: _authenticationBloc = c.create(),
       );
     });
   }
 
   @override 
   void unload(Container container) {
-    container.get<Bloc<AuthenticationEvent, AuthenticationState>>().close();
+    _authenticationBloc.close();
   }
 
 }

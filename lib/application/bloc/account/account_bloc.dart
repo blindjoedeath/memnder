@@ -10,7 +10,15 @@ class AccountBloc extends Bloc<AccountEvent, AccountState>{
 
   final AuthenticationServiceInterface authenticationService;
 
-  AccountBloc({@required this.authenticationService});
+  AccountBloc({@required this.authenticationService}){
+    print("inited $this");
+  }
+
+  @override
+  Future<void> close() {
+    print("deinited $this");
+    return super.close();
+  }
 
   void logout(){
     authenticationService.logout();

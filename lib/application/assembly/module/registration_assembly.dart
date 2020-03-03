@@ -15,6 +15,8 @@ import 'package:memnder/application/view_model/registration_view_model.dart';
 
 class RegistrationAssembly extends ModuleAssembly<RegistrationView>{
 
+  Bloc<RegistrationEvent, RegistrationState> _registrationBloc;
+
   @override
   void assemble(Container container) {
     container.register<Bloc<RegistrationEvent, RegistrationState>>((c){
@@ -27,16 +29,15 @@ class RegistrationAssembly extends ModuleAssembly<RegistrationView>{
 
     container.registerBuilder<RegistrationView>((context, container){
       return RegistrationView(
-        bloc: container.create<Bloc<RegistrationEvent, RegistrationState>>(),
+        bloc: _registrationBloc = container.create()
       );
     });
 
   }
 
-
   @override
   void unload(Container container) {
-    container.get<Bloc<RegistrationEvent, RegistrationState>>().close();
+    _registrationBloc.close();
   }
 
 }

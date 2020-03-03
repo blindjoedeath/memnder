@@ -11,6 +11,8 @@ import 'package:memnder/application/extension/dioc//dioc_widget.dart';
 
 class MemesAssembly extends ModuleAssembly<MemesView>{
 
+  Bloc<MemesEvent, MemesState> _memesBloc;
+
   @override
   void assemble(Container container) {
     registerAsync((c)async{ 
@@ -27,7 +29,7 @@ class MemesAssembly extends ModuleAssembly<MemesView>{
 
     container.registerBuilder<MemesView>((context, container){
       return MemesView(
-        bloc: container.create<Bloc<MemesEvent, MemesState>>(),
+        bloc: _memesBloc = container.create(),
       );
     });
 
@@ -35,7 +37,7 @@ class MemesAssembly extends ModuleAssembly<MemesView>{
 
     @override 
   void unload(Container container) {
-    container.get<Bloc<MemesEvent, MemesState>>().close();
+    _memesBloc.close();
   }
 
 }

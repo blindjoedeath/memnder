@@ -14,6 +14,8 @@ import 'package:memnder/application/extension/dioc//dioc_widget.dart';
 
 class AccountAssembly extends ModuleAssembly<AccountView>{
 
+  Bloc<AccountEvent, AccountState> _accountBloc;
+
   @override
   void assemble(Container container) {
     container.register<Bloc<AccountEvent, AccountState>>((c){
@@ -24,14 +26,14 @@ class AccountAssembly extends ModuleAssembly<AccountView>{
 
     container.registerBuilder<AccountView>((context, c){
       return AccountView(
-        bloc: c.create<Bloc<AccountEvent, AccountState>>(),
+        bloc: _accountBloc = c.create(),
       );
     });
   }
 
   @override 
   void unload(Container container) {
-    container.get<Bloc<AccountEvent, AccountState>>().close();
+    _accountBloc.close();
   }
 
 }
