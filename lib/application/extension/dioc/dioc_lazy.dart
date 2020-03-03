@@ -7,4 +7,8 @@ extension LazyInjection on Container{
     return Lazy<T>(instanceFactory: () => this.get<T>(name: name, creator: creator, mode: mode));
   }
 
+  Lazy<T> createLazy<T>({String creator = null}){
+    return Lazy<T>(instanceFactory: () => this.create<T>(creator: creator));
+  }
+
 }

@@ -23,11 +23,19 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
 
   MemeModel meme;
   FlyAnimationController _flyController;
+  ValueNotifier<bool> _imageFullyLoaded = ValueNotifier(false);
+  bool _isLoadingNullFirstTime = false;
+
+  void _setImageLoaded(bool state){
+    WidgetsBinding.instance.addPostFrameCallback((r){
+      _imageFullyLoaded.value = state;
+      _imageFullyLoaded.notifyListeners();
+    });
+  }
 
   @override
   void initState(){
     super.initState();
-
     _flyController = FlyAnimationController(
       vsync: this
     );
@@ -36,7 +44,6 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   @override
   void dispose(){
     super.dispose();
-
     _flyController.dispose();
   }
 
@@ -56,7 +63,6 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     _flyController.reset();
     setState(() {});
   }
-
 
   Widget _buildFloatingRow(){
     return Row(
@@ -87,6 +93,28 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
           link,
           filterQuality: FilterQuality.high,
           fit: BoxFit.fitWidth,
+          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+            if (loadingProgress == null){
+              if (!_isLoadingNullFirstTime){
+                _isLoadingNullFirstTime = true;
+              } else {
+                _isLoadingNullFirstTime = false;
+                _setImageLoaded(true);
+              }
+              return child;
+            }
+            double percentage;
+            if (loadingProgress.expectedTotalBytes != null){
+              percentage = loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes;
+            }
+
+            return Center(
+              child: CircularProgressIndicator(
+                value: percentage,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+              ),
+            );
+          },
         ),
       )
     );
@@ -147,6 +175,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
           if (state is Initial){
             requestMeme();
           } else if (state is ShowMeme){
+            _setImageLoaded(false);
             meme = state.meme;
           } else if(state is ShowError){
             showError(state.message);
@@ -157,7 +186,15 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
               title: const Text('Мемы'),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-            floatingActionButton: state is ShowMeme ? _buildFloatingRow() : null,
+            floatingActionButton: state is ShowMeme ? ValueListenableBuilder<bool>(
+                valueListenable: _imageFullyLoaded,
+                builder: (context, state, child){
+                  print(state);
+                  if (state){
+                    return _buildFloatingRow();
+                  }
+                  return Container();
+                },) : null,
             body: _buildBody(state),
           );
         }

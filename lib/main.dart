@@ -59,13 +59,13 @@ class RouteObserver extends NavigatorObserver{
 
   @override
   void didRemove(Route route, Route previousRoute) {
-    print("Did remove");
+    print("remove");
     super.didRemove(route, previousRoute);
   }
 
   @override
   void didReplace({Route newRoute, Route oldRoute}) {
-    print("did replace");
+    print("replace");
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
 

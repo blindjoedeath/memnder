@@ -5,6 +5,7 @@ import 'package:memnder/application/bloc/memes/memes_bloc.dart';
 import 'package:memnder/application/bloc/memes/memes_event.dart';
 import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/service/authentication_service.dart';
+import 'package:memnder/application/service/meme_service.dart';
 import 'package:memnder/application/view/memes/memes_view.dart';
 import 'package:memnder/application/extension/dioc//dioc_widget.dart';
 
@@ -19,17 +20,22 @@ class MemesAssembly extends ModuleAssembly<MemesView>{
 
     container.register<Bloc<MemesEvent, MemesState>>((c){
       return MemesBloc(
-        memeService: c.get(),
-        authenticationService: c.get()
+        memeService: c.get<MemeServiceInterface>(),
+        authenticationService: c.get<AuthenticationServiceInterface>()
       );
     });
 
     container.registerBuilder<MemesView>((context, container){
       return MemesView(
-        bloc: container.create(),
+        bloc: container.create<Bloc<MemesEvent, MemesState>>(),
       );
     });
 
+  }
+
+    @override 
+  void unload(Container container) {
+    container.get<Bloc<MemesEvent, MemesState>>().close();
   }
 
 }

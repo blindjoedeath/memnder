@@ -18,15 +18,20 @@ class AccountAssembly extends ModuleAssembly<AccountView>{
   void assemble(Container container) {
     container.register<Bloc<AccountEvent, AccountState>>((c){
       return AccountBloc(
-        authenticationService: c.get(),
+        authenticationService: c.get<AuthenticationServiceInterface>(),
       );
     });
 
     container.registerBuilder<AccountView>((context, c){
       return AccountView(
-        bloc: c.create(),
+        bloc: c.create<Bloc<AccountEvent, AccountState>>(),
       );
     });
+  }
+
+  @override 
+  void unload(Container container) {
+    container.get<Bloc<AccountEvent, AccountState>>().close();
   }
 
 }

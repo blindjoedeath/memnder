@@ -35,7 +35,7 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
     return super.close();
   }
 
-  void getMeme()async{
+  Future _getMeme()async{
     var response = await memeService.getMeme();
     
     if (response is Success<MemeModel>){
@@ -49,15 +49,18 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
     }
   }
 
-  void setMemeReaction(int memeId, MemeReaction reaction)async{
+  Future _setMemeReaction(int memeId, MemeReaction reaction)async{
     var response = await memeService.setMemeReaction(memeId, reaction);
-    /*
     if (response is Error){
        add(MemeError(
          message: response.message
        ));
     }
-    */
+  }
+
+  Future _onReactionSet(int memeId, MemeReaction reaction)async{
+    await _setMemeReaction(memeId, reaction);
+    await _getMeme();
   }
 
   MemesState get initialState => authenticationService.isAuthenticated ?
@@ -104,13 +107,12 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
 
   Stream<MemesState> _mapMemeReactionSet(MemeReactionSet event)async*{
     yield Loading();
-    setMemeReaction(event.meme.id, event.reaction);
-    getMeme();
+    _onReactionSet(event.meme.id, event.reaction);
   }
 
   Stream<MemesState> _mapRequested(MemeRequested event)async*{
     yield Loading();
-    getMeme();
+    _getMeme();
   }
 
 }

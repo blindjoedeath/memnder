@@ -23,15 +23,7 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState>{
       @required this.mapper,
       @required this.registrationService
     }
-  ){
-    print("Created registration bloc");
-  }
-
-  @override
-  Future<void> close(){
-    super.close();
-    print("Close registration bloc");
-  }
+  );
 
   RegistrationState get initialState => RegistrationState();
 

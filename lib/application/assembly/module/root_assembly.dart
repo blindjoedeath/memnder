@@ -28,21 +28,27 @@ class RootViewAssembly extends ModuleAssembly<RootView>{
     });
 
     container.register<Bloc<RootEvent, RootState>>((c){
-      var bloc = RootBloc(
-        authenticationService: c.get()
+      return RootBloc(
+        authenticationService: c.get<AuthenticationServiceInterface>()
       );
-      return bloc;
     });
 
     container.registerBuilder<RootView>((context, c){
-      
       return RootView(
-        bloc: c.create(),
-        authenticationBloc: c.getLazy<Bloc<AuthenticationEvent, AuthenticationState>>(),
-        memesBloc: c.getLazy<Bloc<MemesEvent, MemesState>>(),
-        accountBloc: c.getLazy<Bloc<AccountEvent, AccountState>>(),
+        bloc: c.create<Bloc<RootEvent, RootState>>(),
+        authenticationBloc: c.createLazy<Bloc<AuthenticationEvent, AuthenticationState>>(),
+        memesBloc: c.createLazy<Bloc<MemesEvent, MemesState>>(),
+        accountBloc: c.createLazy<Bloc<AccountEvent, AccountState>>(),
       );
     });    
+  }
+
+  @override 
+  void unload(Container container) {
+    container.get<Bloc<RootEvent, RootState>>().close();
+    container.getLazy<Bloc<AuthenticationEvent, AuthenticationState>>().instance.close();
+    container.getLazy<Bloc<MemesEvent, MemesState>>().instance.close();
+    container.getLazy<Bloc<AccountEvent, AccountState>>().instance.close();
   }
 
 }
