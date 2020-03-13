@@ -1,15 +1,10 @@
 import 'package:memnder/application/api_model/api_response.dart';
 import 'package:memnder/application/api_model/recomended_meme_api_model.dart';
-import 'package:memnder/application/api_model/registration_api_model.dart';
 import 'package:memnder/application/entity/meme_reaction.dart';
-import 'package:memnder/application/model/authentication_model.dart';
-import 'package:memnder/application/model/jwt_credentials.dart';
 import 'package:memnder/application/model/meme_model.dart';
-import 'package:memnder/application/model/registration_model.dart';
 import 'package:memnder/application/model/service_response.dart';
-import 'package:memnder/application/provider/api_base_provider.dart';
 import 'package:memnder/application/provider/memes_api_provider.dart';
-import 'package:memnder/application/provider/secure_storage_provider.dart';
+
 
 abstract class MemeServiceInterface{
   Future<ServiceResponse> getMeme();
@@ -28,7 +23,7 @@ class MemeService extends MemeServiceInterface{
       var result = (response as ApiSuccess<RecomededMemeApiModel>);
       var model = MemeModel(
         id: result.value.id,
-        imageLink: result.value.images[0],
+        images: result.value.images,
       );
       return Success(value: model);
     } else if (response is ApiErrorDetail){

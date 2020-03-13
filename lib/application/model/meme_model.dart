@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class MemeModel{
   final int id;
-  final String imageLink;
+  final List<String> images;
 
   const MemeModel(
     {
       @required this.id,
-      @required this.imageLink
+      @required this.images
     }
   );
 }
