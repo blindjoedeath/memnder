@@ -29,7 +29,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState>{
   
   @override
   Future<void> close(){
-    print("deinited $this");
     return super.close();
   }
 

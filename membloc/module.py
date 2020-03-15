@@ -48,7 +48,8 @@ abstract class {0}State extends Equatable {{
 		self.create_file("state", "application/bloc/{0}/".format(self.underName), code)
 
 	def create_bloc(self):
-		code = """import '{0}_event.dart';
+		code = """import 'package:flutter/material.dart';
+import '{0}_event.dart';
 import '{0}_state.dart';
 import 'package:bloc/bloc.dart';
 

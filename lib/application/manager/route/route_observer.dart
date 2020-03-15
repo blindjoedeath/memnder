@@ -8,7 +8,7 @@ enum RouteKey{
 }
 
 enum RouteType{
-  modal
+  modal, noAnimation
 }
 
 class RouteDependencyObserver extends NavigatorObserver{
@@ -19,13 +19,34 @@ class RouteDependencyObserver extends NavigatorObserver{
     _assembler = assembler;
   }
 
+  static Route<dynamic> _mapModal(RouteSettings route){
+    return MaterialPageRoute(
+      builder: (context){
+        return _assembler.routes[route.name](context);
+      },
+      fullscreenDialog: true,
+      settings: route
+    );
+  }
+
+  static Route<dynamic> _mapNoAnimation(RouteSettings route){
+    return PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => _assembler.routes[route.name](context),
+    );
+  }
+
+
   static Route<dynamic> onGenerateRoute(RouteSettings route){
 
-    var isModal = false;
     var map = route.arguments;
     if (map is Map){
-      if (map.containsKey(RouteKey.routeType) && map[RouteKey.routeType] == RouteType.modal){
-        isModal = true;
+      if (map.containsKey(RouteKey.routeType)){
+        switch(map[RouteKey.routeType]){
+          case RouteType.modal:
+            return _mapModal(route);
+          case RouteType.noAnimation:
+            return _mapNoAnimation(route);
+        }
       }
     }
 
@@ -33,7 +54,6 @@ class RouteDependencyObserver extends NavigatorObserver{
       builder: (context){
         return _assembler.routes[route.name](context);
       },
-      fullscreenDialog: isModal,
       settings: route
     );
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memnder/application/bloc/registration/registration_bloc.dart';
 import 'package:memnder/application/bloc/registration/registration_event.dart';
 import 'package:memnder/application/bloc/registration/registration_state.dart';
+import 'package:memnder/application/manager/route/route_manager.dart';
 import 'package:memnder/application/validator/registration_validator.dart';
 import 'package:memnder/application/view/shared/button/sign_button.dart';
 import 'package:memnder/application/view/shared/text_field/login_text_field.dart';
@@ -84,9 +85,11 @@ class _RegistrationViewState extends State<RegistrationView>{
     );
   }
 
-  void routeToAccount(){
-    WidgetsBinding.instance.addPostFrameCallback((d){
-      Navigator.pop(context);
+  void _routeToRoot(){
+    WidgetsBinding.instance.addPostFrameCallback((d)async{
+      RouteManager.prepareNamed("/app");
+      Navigator.of(context).pop("/app");
+      Navigator.of(context).pushReplacementNamed("/app");
     });
   }
 
@@ -112,7 +115,7 @@ class _RegistrationViewState extends State<RegistrationView>{
         builder: (context, state){
           print(state); 
           if (state is RegistrationSuccess){
-            routeToAccount();
+            _routeToRoot();
           } else if (state is RegistrationError){
             showError(state.message);
           }

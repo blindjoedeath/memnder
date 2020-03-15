@@ -18,7 +18,6 @@ class MyApp extends StatelessWidget {
 
     RouteDependencyObserver.inject(assembler);
     RouteManager.inject(assembler);
-    var routes = assembler.routes;
 
     EasyLoading.instance.. 
         loadingStyle = EasyLoadingStyle.custom

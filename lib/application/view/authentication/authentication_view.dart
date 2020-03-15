@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memnder/application/bloc/authentication/authentication_bloc.dart';
 import 'package:memnder/application/bloc/authentication/authentication_event.dart';
 import 'package:memnder/application/bloc/authentication/authentication_state.dart';
+import 'package:memnder/application/manager/route/route_manager.dart';
 import 'package:memnder/application/validator/authentication_validator.dart';
 import 'package:memnder/application/validator/registration_validator.dart';
 import 'package:memnder/application/view/shared/button/sign_button.dart';
@@ -38,7 +39,14 @@ class _AuthenticationViewState extends State<AuthenticationView>{
   }
 
   void _onRegister()async{
-    await Navigator.of(context).pushNamed("/registration");
+    await Navigator.of(context).pushNamed("/authentication/registration");
+  }
+
+  void _routeToRoot(){
+    WidgetsBinding.instance.addPostFrameCallback((d)async{
+      RouteManager.prepareNamed("/app");
+      await Navigator.of(context).pushReplacementNamed("/app");
+    });
   }
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -103,6 +111,8 @@ class _AuthenticationViewState extends State<AuthenticationView>{
         builder: (context, state){
           if (state is AuthenticationError){
             showError(state.message);
+          } else if (state is AuthenticationSuccess){
+            _routeToRoot();
           }
           return _buildForm(state);
         }

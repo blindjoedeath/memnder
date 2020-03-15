@@ -9,40 +9,21 @@ class RootBloc extends Bloc<RootEvent, RootState>{
 
   AuthenticationServiceInterface authenticationService;
 
-  RootState get initialState => RootState(
-    isAuthenticated: authenticationService.isAuthenticated
+  RootBloc(
+    {
+      @required this.authenticationService
+    }
   );
 
-  void authenticationListener(){
-    if (state.isAuthenticated != authenticationService.isAuthenticated){
-      add(AuthenticationChanged(
-        state: authenticationService.isAuthenticated
-      ));
-    }
-  }
-
-  RootBloc({@required this.authenticationService}){
-    this.authenticationService = authenticationService;
-    authenticationService.addListener(authenticationListener);
-  }
-
-  @override
-  Future<void> close() {
-    authenticationService.removeListener(authenticationListener);
-    return super.close();
+  RootState get initialState{
+    print(authenticationService.isAuthenticated);
+    return RootState(
+      isAuthenticated: authenticationService.isAuthenticated
+    );
   }
 
   @override
   Stream<RootState> mapEventToState(RootEvent event) async* {
-    if (event is AuthenticationChanged){
-      yield* _mapAuthenticationChanged(event);
-    }
-  }
-
-  Stream<RootState> _mapAuthenticationChanged(AuthenticationChanged event)async*{
-    yield RootState(
-      isAuthenticated: event.state
-    );
   }
 
 }

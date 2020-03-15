@@ -5,6 +5,7 @@ import 'package:memnder/application/assembly/assembly.dart';
 import 'package:memnder/application/assembly/mapper/authentication_mapper_assemly.dart';
 import 'package:memnder/application/assembly/mapper/registration_mapper_assembly.dart';
 import 'package:memnder/application/assembly/module/account_assembly.dart';
+import 'package:memnder/application/assembly/module/app_assembly.dart';
 import 'package:memnder/application/assembly/module/authentication_assembly.dart';
 import 'package:memnder/application/assembly/module/load_meme_assembly.dart';
 import 'package:memnder/application/assembly/module/memes_assembly.dart';
@@ -22,12 +23,13 @@ import 'package:memnder/application/assembly/validator/registration_validator_as
 class Assembler{
   
   Map<String, ModuleAssembly> moduleAssemblies = {
-    "/" : RootViewAssembly(),
-    "/registration" : RegistrationAssembly(),
+    "/" : RootAssembly(),
+    "/app" : AppAssembly(),
     "/authentication" : AuthenticationAssembly(),
-    "/memes" : MemesAssembly(),
-    "/account" : AccountAssembly(),
-    "/load_meme" : LoadMemeAssembly()
+    "/authentication/registration" : RegistrationAssembly(),
+    "/app/memes" : MemesAssembly(),
+    "/app/account" : AccountAssembly(),
+    "/app/load_meme" : LoadMemeAssembly(),
   };
 
   List<Assembly> providers = [
@@ -61,6 +63,10 @@ class Assembler{
       _routes = _generateRoutes();
     }
     return _routes;
+  }
+
+  Assembler(){
+    _routes = _generateRoutes();
   }
 
   Map<String, Widget Function(BuildContext)> _generateRoutes(){

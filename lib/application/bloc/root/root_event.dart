@@ -8,17 +8,3 @@ abstract class RootEvent extends Equatable {
   List<Object> get props => [];
 
 }
-
-class AuthenticationChanged extends RootEvent{
-  final bool state;
-
-  const AuthenticationChanged(
-    {
-      @required this.state
-    }
-  );
-
-  @override
-  List<Object> get props => [state];
-}
-			
