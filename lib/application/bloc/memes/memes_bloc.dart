@@ -21,7 +21,6 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
     }
   ) {
     authenticationService.addListener(authListener);
-    print("inited $this");
   }
   
   void authListener(){
@@ -32,7 +31,6 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
 
   @override
   Future<void> close() {
-    print("deinited $this");
     authenticationService.removeListener(authListener);
     return super.close();
   }

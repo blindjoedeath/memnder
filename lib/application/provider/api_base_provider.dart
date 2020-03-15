@@ -10,7 +10,7 @@ import 'dart:convert';
 import 'package:memnder/application/provider/secure_storage_provider.dart';
 
 class ApiBaseProvider extends ChangeNotifier implements Initable{
-  var baseUrl = "http://185.104.249.41";
+  var baseUrl = "https://memder.website";
   SecureStorageProviderInterface secureStorageProvider;
 
   Future init()async{
@@ -194,7 +194,6 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
     var jwt = JwtCredentials();
     jwt = await secureStorageProvider.load<JwtCredentials>(SecureStorageKey.jwtCredentials, jwt);
     if (jwt == null){
-      print("jwt null");
       return CredentialsError();
     }
 

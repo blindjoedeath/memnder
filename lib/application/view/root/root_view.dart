@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memnder/application/bloc/account/account_event.dart';
@@ -22,7 +23,6 @@ class RootView extends StatefulWidget{
   final Lazy<Bloc<MemesEvent, MemesState>> memesBloc;
   final Lazy<Bloc<AccountEvent, AccountState>> accountBloc;
   final Lazy<Bloc<LoadMemeEvent, LoadMemeState>> loadMemeBloc;
-
   final  Bloc<RootEvent, RootState> bloc;
 
   const RootView(
@@ -57,9 +57,17 @@ class _RootViewState extends State<RootView>{
     }
   }
 
-  Widget _buildSecondTab(){
-    return LoadMemeView(
-      bloc: widget.loadMemeBloc.instance,
+  Future _showSecondTab()async{
+    await RouteManager.prepareNamed("/load_meme");
+    Navigator.push(context,
+     MaterialPageRoute(
+       builder: (context){
+         return LoadMemeView(
+           bloc: widget.loadMemeBloc.instance
+         );
+       },
+       fullscreenDialog: true
+     )
     );
   }
 
@@ -82,11 +90,13 @@ class _RootViewState extends State<RootView>{
   Widget _currentBody;
 
   void _onTap(int i)async{
-    index = i;
-    if (index == 0){
+    if (i != 1){
+      index = i;
+    }
+    if (i == 0){
       _currentBody = _buildFirstTab();
-    } else if (index == 1){
-      _currentBody = _buildSecondTab();
+    } else if (i == 1){
+      await _showSecondTab();
     } else {
       _currentBody = await _buildThirdTab();
     } 

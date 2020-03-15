@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:memnder/application/assembly/assemler.dart';
 import 'package:memnder/application/manager/route_manager.dart';
-import 'package:memnder/application/model/registration_model.dart';
+import 'package:memnder/application/manager/route_observer.dart';
+import 'package:memnder/application/provider/api_base_provider.dart';
 
 void main(){
   runApp(MyApp());
@@ -16,11 +17,9 @@ class MyApp extends StatelessWidget {
 
     var assembler = Assembler();
 
-    RouteObserver.inject(assembler);
+    RouteDependencyObserver.inject(assembler);
     RouteManager.inject(assembler);
     var routes = assembler.generateRoutes();
-
-    test();
 
     return FutureBuilder(
       future: RouteManager.prepareNamed("/"),
@@ -42,57 +41,4 @@ class MyApp extends StatelessWidget {
       },
     );
   }
-}
-
-abstract class Service{
-}
-
-class Service1 extends Service {
-  Service1(){
-    print("initing $this");
-  }
-}
-
-class Service2 extends Service {
-  Service2(){
-    print("initing $this");
-  }
-}
-
-test(){
-
-  var container = dioc.Container();
-  container.register<Service>((c) => Service1());
-
-  Service s1 = container.create();
-
-}
-
-class RouteObserver extends NavigatorObserver{
-
-  static Assembler _assembler;
-
-  static void inject(Assembler assembler){
-    _assembler = assembler;
-  }
-
-  @override
-  void didPop(Route route, Route previousRoute) {
-    print(route.settings.name);
-    _assembler.unloadNamed(route.settings.name);
-    super.didPop(route, previousRoute);
-  }
-
-  @override
-  void didRemove(Route route, Route previousRoute) {
-    print("remove");
-    super.didRemove(route, previousRoute);
-  }
-
-  @override
-  void didReplace({Route newRoute, Route oldRoute}) {
-    print("replace");
-    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-  }
-
 }
