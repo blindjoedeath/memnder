@@ -2,27 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memnder/application/bloc/account/account_event.dart';
 import 'package:memnder/application/bloc/account/account_state.dart';
+import 'package:memnder/application/bloc/load_meme/load_meme_event.dart';
+import 'package:memnder/application/bloc/load_meme/load_meme_state.dart';
 import 'package:memnder/application/bloc/memes/memes_event.dart';
 import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/entity/lazy.dart';
-import 'package:memnder/application/bloc/authentication/authentication_bloc.dart';
 import 'package:memnder/application/bloc/authentication/authentication_event.dart';
 import 'package:memnder/application/bloc/authentication/authentication_state.dart';
-import 'package:memnder/application/bloc/registration/registration_bloc.dart';
 import 'package:memnder/application/bloc/root/root_event.dart';
 import 'package:memnder/application/bloc/root/root_state.dart';
 import 'package:memnder/application/manager/route_manager.dart';
-import 'package:memnder/application/model/jwt_credentials.dart';
-import 'package:memnder/application/provider/secure_storage_provider.dart';
 import 'package:memnder/application/view/account/account_view.dart';
 import 'package:memnder/application/view/authentication/authentication_view.dart';
+import 'package:memnder/application/view/load_meme/load_meme_view.dart';
 import 'package:memnder/application/view/memes/memes_view.dart';
-import 'package:memnder/application/view/registration/registration_view.dart';
 
 class RootView extends StatefulWidget{ 
   final Lazy<Bloc<AuthenticationEvent, AuthenticationState>> authenticationBloc;
   final Lazy<Bloc<MemesEvent, MemesState>> memesBloc;
   final Lazy<Bloc<AccountEvent, AccountState>> accountBloc;
+  final Lazy<Bloc<LoadMemeEvent, LoadMemeState>> loadMemeBloc;
 
   final  Bloc<RootEvent, RootState> bloc;
 
@@ -31,7 +30,8 @@ class RootView extends StatefulWidget{
       @required this.bloc,
       @required this.authenticationBloc,
       @required this.memesBloc,
-      @required this.accountBloc
+      @required this.accountBloc, 
+      @required this.loadMemeBloc
     }
   );
 
@@ -57,7 +57,13 @@ class _RootViewState extends State<RootView>{
     }
   }
 
-  Future<Widget> _buildSecondTab()async{
+  Widget _buildSecondTab(){
+    return LoadMemeView(
+      bloc: widget.loadMemeBloc.instance,
+    );
+  }
+
+  Future<Widget> _buildThirdTab()async{
     await RouteManager.prepareNamed("/memes");
     return MemesView(
       bloc: widget.memesBloc.instance
@@ -79,9 +85,11 @@ class _RootViewState extends State<RootView>{
     index = i;
     if (index == 0){
       _currentBody = _buildFirstTab();
+    } else if (index == 1){
+      _currentBody = _buildSecondTab();
     } else {
-      _currentBody = await _buildSecondTab();
-    }
+      _currentBody = await _buildThirdTab();
+    } 
     setState(() {});
   }
 
@@ -106,6 +114,10 @@ class _RootViewState extends State<RootView>{
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_circle),
                 title: Text("Аккаунт")
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add_box),
+                title: Text("Добавить")
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.tag_faces),

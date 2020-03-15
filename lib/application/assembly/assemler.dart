@@ -6,6 +6,7 @@ import 'package:memnder/application/assembly/mapper/authentication_mapper_asseml
 import 'package:memnder/application/assembly/mapper/registration_mapper_assembly.dart';
 import 'package:memnder/application/assembly/module/account_assembly.dart';
 import 'package:memnder/application/assembly/module/authentication_assembly.dart';
+import 'package:memnder/application/assembly/module/load_meme_assembly.dart';
 import 'package:memnder/application/assembly/module/memes_assembly.dart';
 import 'package:memnder/application/assembly/module/registration_assembly.dart';
 import 'package:memnder/application/assembly/module/root_assembly.dart';
@@ -25,7 +26,8 @@ class Assembler{
     "/registration" : RegistrationAssembly(),
     "/authentication" : AuthenticationAssembly(),
     "/memes" : MemesAssembly(),
-    "/account" : AccountAssembly()
+    "/account" : AccountAssembly(),
+    "/load_meme" : LoadMemeAssembly()
   };
 
   List<Assembly> providers = [
