@@ -21,7 +21,7 @@ import 'package:memnder/application/assembly/validator/registration_validator_as
 
 class Assembler{
   
-  Map<String, ModuleAssembly> routes = {
+  Map<String, ModuleAssembly> moduleAssemblies = {
     "/" : RootViewAssembly(),
     "/registration" : RegistrationAssembly(),
     "/authentication" : AuthenticationAssembly(),
@@ -55,7 +55,15 @@ class Assembler{
 
   Container container;
 
-  Map<String, Widget Function(BuildContext)> generateRoutes(){
+  Map<String, Widget Function(BuildContext)> _routes;
+  Map<String, Widget Function(BuildContext)> get routes{
+    if (_routes == null){
+      _routes = _generateRoutes();
+    }
+    return _routes;
+  }
+
+  Map<String, Widget Function(BuildContext)> _generateRoutes(){
 
     container = Container();
 
@@ -75,21 +83,22 @@ class Assembler{
       value.assemble(container);
     });
 
-    routes.forEach((key, value){
+    moduleAssemblies.forEach((key, value){
       value.assemble(container);
     });
 
-    return routes.map((key, value){
+    return moduleAssemblies.map((key, value){
       return MapEntry(key, (c) => value.getView(c, container));
     });
   }
 
   Future prepareNamed(String route){
-    return routes[route].prepare(container);
+    return moduleAssemblies[route].prepare(container);
   }
 
   void unloadNamed(String route){
-    var assembly = routes[route];
+    print(route);
+    var assembly = moduleAssemblies[route];
     assembly.unload(container);
   }
 

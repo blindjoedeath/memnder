@@ -5,8 +5,6 @@ import 'package:memnder/application/bloc/account/account_event.dart';
 import 'package:memnder/application/bloc/account/account_state.dart';
 import 'package:memnder/application/bloc/authentication/authentication_event.dart';
 import 'package:memnder/application/bloc/authentication/authentication_state.dart';
-import 'package:memnder/application/bloc/load_meme/load_meme_event.dart';
-import 'package:memnder/application/bloc/load_meme/load_meme_state.dart';
 import 'package:memnder/application/bloc/memes/memes_event.dart';
 import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/bloc/root/root_bloc.dart';
@@ -24,7 +22,6 @@ class RootViewAssembly extends ModuleAssembly<RootView>{
   Lazy<Bloc<AuthenticationEvent, AuthenticationState>> _authenticationBloc;
   Lazy<Bloc<MemesEvent, MemesState>> _memesBloc;
   Lazy<Bloc<AccountEvent, AccountState>> _accountBloc;
-  Lazy<Bloc<LoadMemeEvent, LoadMemeState>> _loadMemeBloc;
 
   @override
   void assemble(Container container) {
@@ -46,7 +43,6 @@ class RootViewAssembly extends ModuleAssembly<RootView>{
         authenticationBloc: _authenticationBloc = c.createLazy(),
         memesBloc: _memesBloc = c.createLazy(),
         accountBloc: _accountBloc = c.createLazy(),
-        loadMemeBloc: _loadMemeBloc = c.createLazy(),
       );
     });    
   }
@@ -58,7 +54,6 @@ class RootViewAssembly extends ModuleAssembly<RootView>{
     _accountBloc.instance.close();
     _memesBloc.instance.close();
     _accountBloc.instance.close();
-    _loadMemeBloc.instance.close();
   }
 
 }

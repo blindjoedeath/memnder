@@ -9,6 +9,7 @@ import 'package:memnder/application/provider/memes_api_provider.dart';
 abstract class MemeServiceInterface{
   Future<ServiceResponse> getMeme();
   Future<ServiceResponse> setMemeReaction(int memeId, MemeReaction reaction);
+  Future<ServiceResponse> upload(List<List<int>> images);
 }
 
 
@@ -43,7 +44,19 @@ class MemeService extends MemeServiceInterface{
     var response = await (reaction == MemeReaction.like ?
        memesApiProvider.like(memeId) :
       memesApiProvider.dislike(memeId));
-    print(response);
+    if (response is ApiSuccess){
+      return Success(value: null);
+    } else if (response is ApiErrorDetail){
+      return Error(
+        message: response.message
+      );
+    }
+    return Error();
+  }
+
+  @override
+  Future<ServiceResponse> upload(List<List<int>> images) async{
+    var response = await memesApiProvider.upload(images);
     if (response is ApiSuccess){
       return Success(value: null);
     } else if (response is ApiErrorDetail){

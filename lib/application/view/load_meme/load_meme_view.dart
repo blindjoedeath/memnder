@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memnder/application/bloc/load_meme/load_meme_event.dart';
 import 'package:memnder/application/bloc/load_meme/load_meme_state.dart';
 import 'package:memnder/application/view/load_meme/load_meme_grid.dart';
-import 'package:memnder/application/view/shared/button/sign_button.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 
 class LoadMemeView extends StatefulWidget{
@@ -48,12 +48,12 @@ class _LoadMemeViewState extends State<LoadMemeView>{
       
     } on Exception catch (e) {
       var error = e.toString();
-      showError(error);
+      _showError(error);
     }
   }
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  void showError(String message){
+  void _showError(String message){
     WidgetsBinding.instance.addPostFrameCallback((d){
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -61,6 +61,28 @@ class _LoadMemeViewState extends State<LoadMemeView>{
           content: Text("Ошибка" + (message != null ? ": $message" : ""))
         )
       );
+    });
+  }
+
+  void _showSuccess(){
+    WidgetsBinding.instance.addPostFrameCallback((d){
+      EasyLoading.showSuccess('Успешно!');
+      Future.delayed(Duration(seconds: 2), (){
+        EasyLoading.dismiss();
+        Navigator.pop(context);
+      }); 
+    }); 
+  }
+
+  void _showSending(){
+    WidgetsBinding.instance.addPostFrameCallback((d){
+      EasyLoading.show(status: 'Отправляем...');
+    }); 
+  }
+
+  void _showLoadingError(){
+    WidgetsBinding.instance.addPostFrameCallback((d){
+      EasyLoading.showError('Ошибка!');
     });
   }
 
@@ -100,12 +122,38 @@ class _LoadMemeViewState extends State<LoadMemeView>{
   }
 
   Widget _buildBody(){
-    return _images.isEmpty ? Center(
-      child: Text(
-        "Загрузите мемы",
-        style: Theme.of(context).textTheme.display1,
-      ) 
-    ) : _buildGridView();
+    return BlocBuilder<Bloc<LoadMemeEvent, LoadMemeState>, LoadMemeState>(
+      bloc: widget.bloc,
+      builder: (context, state){
+
+        if (state is LoadError){
+          _showLoadingError();
+        } else if (state is LoadSuccess){
+          _showSuccess();
+        } if (state is Sending){
+          _showSending();
+        }
+
+        return _images.isEmpty ? Center(
+          child: Text(
+            "Загрузите мемы",
+            style: Theme.of(context).textTheme.display1,
+          ) 
+        ) : _buildGridView();
+      },
+    );
+  }
+
+  void _sendMemes()async{
+    var sendImages = List<List<int>>();
+    for(int i = 0; i < _images.length; ++i){
+      var byteData = await _images[i].getByteData();
+      var image = byteData.buffer.asUint8List();
+      sendImages.add(image);
+    }
+    widget.bloc.add(SendMeme(
+      images: sendImages
+    ));
   }
 
   Widget _buildFloatingButton(){
@@ -118,7 +166,7 @@ class _LoadMemeViewState extends State<LoadMemeView>{
             if (state && _images.length < kMaxCount || _images.isEmpty){
               _loadImages();
             } else{
-              // send
+              _sendMemes();
             }
           },
         );

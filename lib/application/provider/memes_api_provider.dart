@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:memnder/application/api_model/api_response.dart';
 import 'package:memnder/application/api_model/recomended_meme_api_model.dart';
 import 'package:memnder/application/provider/api_base_provider.dart';
+import 'package:http_parser/http_parser.dart';
 
 abstract class MemesApiProviderInterface{
   Future<ApiResponse> recomededMeme();
   Future<ApiResponse> like(int memeId);
   Future<ApiResponse> dislike(int memeId);
+  Future<ApiResponse> upload(List<List<int>> images);
 }
 
 class MemeEnd extends ApiResponse{}
@@ -107,5 +109,22 @@ class MemesApiProvider extends MemesApiProviderInterface{
     catch(e){
       return ApiError();
     }
+  }
+
+  @override
+  Future<ApiResponse> upload(List<List<int>> images)async{
+    var apiResponse = await apiBaseProvider.authorizedMultipartPost("/api/memes/upload/", (request)async{
+      for(int i = 0; i < images.length; ++i){
+        var file = client.MultipartFile.fromBytes(
+          'photo',
+          images[i],
+          filename: 'img_${i+1}.jpg',
+          contentType: MediaType("image", "jpg"),
+        );
+        request.files.add(file);
+      }
+    });
+
+    return apiResponse;
   }
 }

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memnder/application/bloc/account/account_event.dart';
 import 'package:memnder/application/bloc/account/account_state.dart';
-import 'package:memnder/application/bloc/load_meme/load_meme_event.dart';
-import 'package:memnder/application/bloc/load_meme/load_meme_state.dart';
 import 'package:memnder/application/bloc/memes/memes_event.dart';
 import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/entity/lazy.dart';
@@ -12,17 +10,16 @@ import 'package:memnder/application/bloc/authentication/authentication_event.dar
 import 'package:memnder/application/bloc/authentication/authentication_state.dart';
 import 'package:memnder/application/bloc/root/root_event.dart';
 import 'package:memnder/application/bloc/root/root_state.dart';
-import 'package:memnder/application/manager/route_manager.dart';
+import 'package:memnder/application/manager/route/route_manager.dart';
+import 'package:memnder/application/manager/route/route_observer.dart';
 import 'package:memnder/application/view/account/account_view.dart';
 import 'package:memnder/application/view/authentication/authentication_view.dart';
-import 'package:memnder/application/view/load_meme/load_meme_view.dart';
 import 'package:memnder/application/view/memes/memes_view.dart';
 
 class RootView extends StatefulWidget{ 
   final Lazy<Bloc<AuthenticationEvent, AuthenticationState>> authenticationBloc;
   final Lazy<Bloc<MemesEvent, MemesState>> memesBloc;
   final Lazy<Bloc<AccountEvent, AccountState>> accountBloc;
-  final Lazy<Bloc<LoadMemeEvent, LoadMemeState>> loadMemeBloc;
   final  Bloc<RootEvent, RootState> bloc;
 
   const RootView(
@@ -31,7 +28,6 @@ class RootView extends StatefulWidget{
       @required this.authenticationBloc,
       @required this.memesBloc,
       @required this.accountBloc, 
-      @required this.loadMemeBloc
     }
   );
 
@@ -59,16 +55,10 @@ class _RootViewState extends State<RootView>{
 
   Future _showSecondTab()async{
     await RouteManager.prepareNamed("/load_meme");
-    Navigator.push(context,
-     MaterialPageRoute(
-       builder: (context){
-         return LoadMemeView(
-           bloc: widget.loadMemeBloc.instance
-         );
-       },
-       fullscreenDialog: true
-     )
-    );
+    Navigator.pushNamed(context, "/load_meme",
+      arguments: {
+        RouteKey.routeType : RouteType.modal
+      });
   }
 
   Future<Widget> _buildThirdTab()async{

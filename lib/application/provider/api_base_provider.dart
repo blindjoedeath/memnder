@@ -225,6 +225,44 @@ class ApiBaseProvider extends ChangeNotifier implements Initable{
     } 
   }
 
+  Future<ApiResponse> authorizedMultipartPostImpl(String method,
+                                              Future Function(client.MultipartRequest) builder,
+                                              {bool isFirst = true})async{
+    var jwt = JwtCredentials();
+    jwt = await secureStorageProvider.load<JwtCredentials>(SecureStorageKey.jwtCredentials, jwt);
+    if (jwt == null){
+      return CredentialsError();
+    }
+
+    var url = Uri.parse(baseUrl + method);
+    var request = new client.MultipartRequest("POST", url);
+    request.headers["Authorization"] = "Bearer ${jwt.accessToken}";
+
+    await builder(request);
+    var response = await request.send();
+
+    if (response.statusCode == 401){
+      print("UNAUTHORIZED");
+      if (isFirst){
+        var authResponse = await refreshToken(jwt);
+        if (authResponse is ApiSuccess){
+          return authorizedMultipartPostImpl(method, builder, isFirst: false);
+        }
+      } else {
+        return ApiError();
+      }
+    } else{
+      print("AUTHORIZED");
+      return ApiSuccess(
+        value: response
+      );
+    } 
+  }
+
+  Future<ApiResponse> authorizedMultipartPost(String method, Future Function(client.MultipartRequest) builder)async{
+    return authorizedMultipartPostImpl(method, builder);
+  }
+
   Future<ApiResponse> authorizedGetRequest(String method)async{
     return authorizedGetRequestImpl(method);
   }

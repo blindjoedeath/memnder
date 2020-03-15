@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-abstract class LoadMemeState extends Equatable {
+class LoadMemeState extends Equatable {
   const LoadMemeState();
 
   @override
@@ -9,3 +9,13 @@ abstract class LoadMemeState extends Equatable {
 
 }
 			
+
+class Sending extends LoadMemeState{}
+
+class LoadSuccess extends LoadMemeState{}
+
+class LoadError extends LoadMemeState{
+  final String message;
+
+  const LoadError({@required this.message});
+}

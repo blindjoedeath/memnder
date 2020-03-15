@@ -15,6 +15,7 @@ class LoadMemeAssembly extends ModuleAssembly<LoadMemeView>{
   void assemble(Container container) {
     container.register<Bloc<LoadMemeEvent, LoadMemeState>>((c){
       return LoadMemeBloc(
+        memeService: c.get()
       );
     });
 

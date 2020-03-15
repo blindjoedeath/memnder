@@ -3,6 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:memnder/application/assembly/assemler.dart';
 
+enum RouteKey{
+  routeType
+}
+
+enum RouteType{
+  modal
+}
+
 class RouteDependencyObserver extends NavigatorObserver{
 
   static Assembler _assembler;
@@ -10,6 +18,25 @@ class RouteDependencyObserver extends NavigatorObserver{
   static void inject(Assembler assembler){
     _assembler = assembler;
   }
+
+  static Route<dynamic> onGenerateRoute(RouteSettings route){
+
+    var isModal = false;
+    var map = route.arguments;
+    if (map is Map){
+      if (map.containsKey(RouteKey.routeType) && map[RouteKey.routeType] == RouteType.modal){
+        isModal = true;
+      }
+    }
+
+    return MaterialPageRoute(
+      builder: (context){
+        return _assembler.routes[route.name](context);
+      },
+      fullscreenDialog: isModal,
+      settings: route
+    );
+}
 
   @override
   void didPop(Route route, Route previousRoute) {
