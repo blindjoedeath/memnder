@@ -28,7 +28,7 @@ class MemesView extends StatefulWidget{
 
 class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMixin{
 
-  MemeModel meme;
+  MemeModel savedMeme;
   FlyAnimationController _flyController;
   ValueNotifier<bool> _imageFullyLoaded = ValueNotifier(false);
   int _currentImage = 0;
@@ -73,11 +73,10 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     var animation = _flyController.forward();
 
     widget.bloc.add(MemeReactionSet(
-      meme: meme,
+      meme: savedMeme,
       reaction: reaction
     ));
     await animation;
-    _flyController.reset();
     setState(() {});
   }
 
@@ -120,6 +119,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
 
   Widget _buildSwiper(MemeModel meme){
     return Swiper(
+      index: _currentImage,
       itemCount: meme.images.length,
       itemBuilder: (context, index){
         return _buildImage(meme.images[index]);
@@ -136,8 +136,8 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     );
   }
 
-  void _showDetail(MemeModel meme){
-    Navigator.push(context,
+  void _showDetail(MemeModel meme)async{
+    int index = await Navigator.push(context,
       MaterialPageRoute(
         builder: (context){
           return MemeDetail(
@@ -147,7 +147,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
         },
         fullscreenDialog: true
       )
-    );
+    );   
   }
 
   Widget _buildMeme(MemeModel meme){
@@ -174,7 +174,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       child: Padding(
         padding: EdgeInsets.only(top: 24, right: 12, left: 12, bottom: 88),
         child:  (state is ShowMeme ? _buildMeme(state.meme) : 
-                (state is Loading && _flyController.isAnimating) ? _buildMeme(meme) : 
+                (state is Loading && _flyController.isAnimating) ? _buildMeme(savedMeme) : 
                 (state is Loading) ? CircularProgressIndicator() : 
                 (state is Unauthenticated ? _buildText("Авторизуйтесь") : 
                 (state is ShowAlert ? _buildText(state.message) : null))),
@@ -218,7 +218,8 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
           if (state is Initial){
             requestMeme();
           } else if (state is ShowMeme){
-            meme = state.meme;
+            savedMeme = state.meme;
+            _flyController.reset();
           } else if(state is ShowError){
             showError(state.message);
           }

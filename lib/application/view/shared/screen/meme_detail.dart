@@ -35,7 +35,7 @@ class _MemeDetailState extends State<MemeDetail>{
   @override
   void dispose(){
     super.dispose();
-    _controller.dispose();
+    _controller?.dispose();
   }
 
   Widget _buildBody(){
@@ -94,7 +94,7 @@ class _MemeDetailState extends State<MemeDetail>{
                     splashColor: Colors.transparent,
                     icon: Icon(Icons.close, color: Colors.white, size: 32,),
                     onPressed: (){
-                      Navigator.pop(context);
+                      Navigator.pop(context, _currentIndex);
                     },
                   )
                 )
