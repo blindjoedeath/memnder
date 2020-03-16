@@ -13,6 +13,7 @@ import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/entity/meme_reaction.dart';
 import 'package:memnder/application/model/meme_model.dart';
 import 'package:memnder/application/view/shared/animation/fly_animation.dart';
+import 'package:memnder/application/view/shared/screen/meme_detail.dart';
 
 class MemesView extends StatefulWidget{
 
@@ -82,30 +83,35 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
           onPressed: () => _setReaction(MemeReaction.skip),
           label: Text('Пропустить'),
           icon: Icon(Icons.navigate_next),
-          backgroundColor: Colors.black45
+          backgroundColor: Colors.black45,
+          heroTag: null,
         ),
         FloatingActionButton.extended(
           onPressed: () => _setReaction(MemeReaction.like),
           label: Text('     Лайк     '),
           icon: Icon(Icons.thumb_up),
           backgroundColor: Colors.green,
+          heroTag: null,
         ),
       ],
     );
   }
 
   Widget _buildImage(String link){
-    return TransitionToImage(
-      fit: BoxFit.fitWidth,
-      image: AdvancedNetworkImage(
-        link,
-      ),
-      placeholder: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(Colors.green),
-      ),
-      loadedCallback: (){
-        _setImageLoaded(true);
-      },
+    return Hero(
+      tag: link,
+      child: TransitionToImage(
+        fit: BoxFit.fitWidth,
+        image: AdvancedNetworkImage(
+          link,
+        ),
+        placeholder: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(Colors.green),
+        ),
+        loadedCallback: (){
+          _setImageLoaded(true);
+        },
+      )
     );
   }
 
@@ -126,11 +132,28 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     );
   }
 
+  void _showDetail(MemeModel meme){
+    Navigator.push(context,
+      MaterialPageRoute(
+        builder: (context){
+          return MemeDetail(
+            images: meme.images
+          );
+        }
+      )
+    );
+  }
+
   Widget _buildMeme(MemeModel meme){
-    return FlyAnimation(
-      controller: _flyController,
-      child: meme.images.length > 1 ? _buildSwiper(meme) 
-                                    : _buildImage(meme.images[0])
+    return GestureDetector(
+      child: FlyAnimation(
+        controller: _flyController,
+        child: meme.images.length > 1 ? _buildSwiper(meme) 
+                                      : _buildImage(meme.images[0])
+      ),
+      onTapUp: (d){
+        _showDetail(meme);
+      },
     );
   }
 
