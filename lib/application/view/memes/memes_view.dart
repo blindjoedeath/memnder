@@ -31,6 +31,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   MemeModel meme;
   FlyAnimationController _flyController;
   ValueNotifier<bool> _imageFullyLoaded = ValueNotifier(false);
+  int _currentImage = 0;
 
   void _setImageLoaded(bool state){
     if (state){
@@ -58,8 +59,13 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     _flyController.dispose();
   }
 
-  void _setReaction(MemeReaction reaction)async{
+  void _resetState(){
+    _currentImage = 0;
     _setImageLoaded(false);
+  }
+
+  void _setReaction(MemeReaction reaction)async{
+    _resetState();
     _flyController.direction = FlyAnimationDirection.left;
     if (reaction == MemeReaction.like){
       _flyController.direction = FlyAnimationDirection.right;
@@ -98,20 +104,17 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   }
 
   Widget _buildImage(String link){
-    return Hero(
-      tag: link,
-      child: TransitionToImage(
-        fit: BoxFit.fitWidth,
-        image: AdvancedNetworkImage(
-          link,
-        ),
-        placeholder: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(Colors.green),
-        ),
-        loadedCallback: (){
-          _setImageLoaded(true);
-        },
-      )
+    return TransitionToImage(
+      fit: BoxFit.fitWidth,
+      image: AdvancedNetworkImage(
+        link,
+      ),
+      placeholder: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation(Colors.green),
+      ),
+      loadedCallback: (){
+        _setImageLoaded(true);
+      },
     );
   }
 
@@ -121,6 +124,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       itemBuilder: (context, index){
         return _buildImage(meme.images[index]);
       },
+      onIndexChanged: (i) => _currentImage = i,
       loop: false,
       pagination: SwiperPagination(
         margin: EdgeInsets.all(5),
@@ -137,9 +141,11 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       MaterialPageRoute(
         builder: (context){
           return MemeDetail(
-            images: meme.images
+            images: meme.images,
+            initialPage: _currentImage,
           );
-        }
+        },
+        fullscreenDialog: true
       )
     );
   }
