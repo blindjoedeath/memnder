@@ -20,7 +20,8 @@ class AccountAssembly extends ModuleAssembly<AccountView>{
   void assemble(Container container) {
     container.register<Bloc<AccountEvent, AccountState>>((c){
       return AccountBloc(
-        authenticationService: c.get<AuthenticationServiceInterface>(),
+        authenticationService: c.get(),
+        memeService: c.get()
       );
     });
 

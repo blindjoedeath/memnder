@@ -103,7 +103,6 @@ class Assembler{
   }
 
   void unloadNamed(String route){
-    print(route);
     var assembly = moduleAssemblies[route];
     assembly?.unload(container);
   }

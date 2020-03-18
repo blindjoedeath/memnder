@@ -69,6 +69,7 @@ class _LoadMemeViewState extends State<LoadMemeView>{
       EasyLoading.showSuccess('Успешно!');
       Future.delayed(Duration(seconds: 2), (){
         EasyLoading.dismiss();
+        widget.bloc.add(ShowedAlert());
         Navigator.pop(context);
       }); 
     }); 
@@ -77,12 +78,20 @@ class _LoadMemeViewState extends State<LoadMemeView>{
   void _showSending(){
     WidgetsBinding.instance.addPostFrameCallback((d){
       EasyLoading.show(status: 'Отправляем...');
+      Future.delayed(Duration(seconds: 2), (){
+        EasyLoading.dismiss();
+        widget.bloc.add(ShowedAlert());
+      }); 
     }); 
   }
 
   void _showLoadingError(){
     WidgetsBinding.instance.addPostFrameCallback((d){
       EasyLoading.showError('Ошибка!');
+      Future.delayed(Duration(seconds: 2), (){
+        EasyLoading.dismiss();
+        widget.bloc.add(ShowedAlert());
+      }); 
     });
   }
 
@@ -125,7 +134,7 @@ class _LoadMemeViewState extends State<LoadMemeView>{
     return BlocBuilder<Bloc<LoadMemeEvent, LoadMemeState>, LoadMemeState>(
       bloc: widget.bloc,
       builder: (context, state){
-
+        
         if (state is LoadError){
           _showLoadingError();
         } else if (state is LoadSuccess){

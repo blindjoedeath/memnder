@@ -23,14 +23,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState>{
       @required this.mapper,
       @required this.authenticationService
     }
-  ){
-    print("inited $this");
-  }
-  
-  @override
-  Future<void> close(){
-    return super.close();
-  }
+  );
 
   AuthenticationState get initialState => AuthenticationState();
 

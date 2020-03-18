@@ -15,8 +15,7 @@ class RootBloc extends Bloc<RootEvent, RootState>{
     }
   );
 
-  RootState get initialState{
-    print(authenticationService.isAuthenticated);
+  RootState get initialState{ 
     return RootState(
       isAuthenticated: authenticationService.isAuthenticated
     );

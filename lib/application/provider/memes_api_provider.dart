@@ -3,6 +3,7 @@ import 'package:http/http.dart' as client;
 import 'package:flutter/material.dart';
 import 'package:memnder/application/api_model/api_response.dart';
 import 'package:memnder/application/api_model/recomended_meme_api_model.dart';
+import 'package:memnder/application/api_model/user_memes.dart';
 import 'package:memnder/application/provider/api_base_provider.dart';
 import 'package:http_parser/http_parser.dart';
 
@@ -11,6 +12,8 @@ abstract class MemesApiProviderInterface{
   Future<ApiResponse> like(int memeId);
   Future<ApiResponse> dislike(int memeId);
   Future<ApiResponse> upload(List<List<int>> images);
+  Future<ApiResponse> memesByUser();
+  Future<ApiResponse> nextMemes();
 }
 
 class MemeEnd extends ApiResponse{}
@@ -39,10 +42,9 @@ class MemesApiProvider extends MemesApiProviderInterface{
     try{
       var json = jsonDecode(response.body);
       if (response.statusCode == 200){
-        var meme = RecomededMemeApiModel.fromJson(json);
+        var meme = RecomendedMemeApiModel.fromJson(json);
         var urls = meme.images.map((link) => apiBaseProvider.baseUrl + link).toList();
         meme = meme.copyWith(images: urls);
-        print(meme.id);
         return ApiSuccess(
           value: meme
         );
@@ -60,8 +62,6 @@ class MemesApiProvider extends MemesApiProviderInterface{
   }
 
   Future<ApiResponse> like(int memeId)async{
-    
-    print(memeId);
     var apiResponse = await apiBaseProvider
       .authorizedPostRequest("/api/memes/like/$memeId/", null);
 
@@ -116,15 +116,73 @@ class MemesApiProvider extends MemesApiProviderInterface{
     var apiResponse = await apiBaseProvider.authorizedMultipartPost("/api/memes/upload/", (request)async{
       for(int i = 0; i < images.length; ++i){
         var file = client.MultipartFile.fromBytes(
-          'photo',
+          'img_${i+1}',
           images[i],
           filename: 'img_${i+1}.jpg',
-          contentType: MediaType("image", "jpg"),
+          contentType: MediaType("image", "jpeg"),
         );
         request.files.add(file);
       }
     });
 
     return apiResponse;
+  }
+
+  String _nextUrl;
+  @override
+  Future<ApiResponse> memesByUser()async{
+    var apiResponse = await apiBaseProvider
+      .authorizedGetRequest("/api/memes/memesbyuser/");
+
+    if (apiResponse is! ApiSuccess){
+      return apiResponse;
+    }
+    var response = (apiResponse as ApiSuccess<client.Response>).value;
+    try{
+      var json = jsonDecode(response.body);
+      if (response.statusCode == 200){
+        var model = UserMemesApiModel.fromJson(json);
+        _nextUrl = model.next;
+        return ApiSuccess(value: model);
+      } else{
+        return ApiErrorDetail(
+          message: json["detail"],
+          statusCode: response.statusCode
+        );
+      }
+    }
+    catch(e){
+      return ApiError();
+    }
+  }
+
+  @override
+  Future<ApiResponse> nextMemes()async{
+    if (_nextUrl == null){
+      return MemeEnd();
+    }
+
+    var apiResponse = await apiBaseProvider
+      .authorizedGetRequestUrl(_nextUrl);
+
+    if (apiResponse is! ApiSuccess){
+      return apiResponse;
+    }
+    var response = (apiResponse as ApiSuccess<client.Response>).value;
+    try{
+      var json = jsonDecode(response.body);
+      if (response.statusCode == 200){
+        var model = UserMemesApiModel.fromJson(json);
+        return ApiSuccess(value: model);
+      } else{
+        return ApiErrorDetail(
+          message: json["detail"],
+          statusCode: response.statusCode
+        );
+      }
+    }
+    catch(e){
+      return ApiError();
+    }
   }
 }

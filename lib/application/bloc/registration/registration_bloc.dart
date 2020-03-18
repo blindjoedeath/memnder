@@ -24,12 +24,10 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState>{
       @required this.registrationService
     }
   ){
-    print("inited $this $hashCode");
   }
 
   @override
   Future<void> close(){
-    print("deinited $this $hashCode");
     return super.close();
   }
 

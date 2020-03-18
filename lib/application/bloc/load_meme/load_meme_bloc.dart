@@ -29,7 +29,13 @@ class LoadMemeBloc extends Bloc<LoadMemeEvent, LoadMemeState>{
       yield* _mapSendMeme(event);
     } else if (event is MemeSendingResult){
       yield* _mapMemeSendingResult(event);
+    } else if (event is ShowedAlert){
+      yield* _mapShowedAlert(event);
     }
+  }
+
+  Stream<LoadMemeState> _mapShowedAlert(ShowedAlert event) async*{
+    yield LoadMemeState();
   }
 
   Stream<LoadMemeState> _mapMemeSendingResult(MemeSendingResult event) async*{

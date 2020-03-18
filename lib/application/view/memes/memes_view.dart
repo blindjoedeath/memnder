@@ -104,7 +104,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
 
   Widget _buildImage(String link){
     return TransitionToImage(
-      fit: BoxFit.fitWidth,
+      fit: BoxFit.contain,
       image: AdvancedNetworkImage(
         link,
       ),
@@ -113,6 +113,9 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       ),
       loadedCallback: (){
         _setImageLoaded(true);
+        WidgetsBinding.instance.addPostFrameCallback((d){
+          _flyController.reset();
+        });
       },
     );
   }
@@ -154,8 +157,12 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     return GestureDetector(
       child: FlyAnimation(
         controller: _flyController,
-        child: meme.images.length > 1 ? _buildSwiper(meme) 
+        child: SizedBox(
+          width: double.infinity,
+          height: 300,
+          child: meme.images.length > 1 ? _buildSwiper(meme) 
                                       : _buildImage(meme.images[0])
+        )
       ),
       onTapUp: (d){
         _showDetail(meme);
@@ -170,6 +177,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   }
 
   Widget _buildBody(MemesState state){
+    print("$state  ${_flyController.isAnimating}");
     return Center(
       child: Padding(
         padding: EdgeInsets.only(top: 24, right: 12, left: 12, bottom: 88),
@@ -219,7 +227,6 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
             requestMeme();
           } else if (state is ShowMeme){
             savedMeme = state.meme;
-            _flyController.reset();
           } else if(state is ShowError){
             showError(state.message);
           }

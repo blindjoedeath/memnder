@@ -67,13 +67,11 @@ class RouteDependencyObserver extends NavigatorObserver{
 
   @override
   void didRemove(Route route, Route previousRoute) {
-    print("remove");
     super.didRemove(route, previousRoute);
   }
 
   @override
   void didReplace({Route newRoute, Route oldRoute}) {
-    print("replace");
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
 

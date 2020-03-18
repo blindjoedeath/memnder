@@ -113,7 +113,6 @@ class _RegistrationViewState extends State<RegistrationView>{
       body: BlocBuilder<Bloc<RegistrationEvent, RegistrationState>, RegistrationState>(
         bloc: widget.bloc,
         builder: (context, state){
-          print(state); 
           if (state is RegistrationSuccess){
             _routeToRoot();
           } else if (state is RegistrationError){

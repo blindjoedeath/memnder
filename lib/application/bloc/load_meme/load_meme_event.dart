@@ -27,3 +27,5 @@ class MemeSendingResult extends LoadMemeEvent{
 
   const MemeSendingResult({@required this.result});
 }
+
+class ShowedAlert extends LoadMemeEvent{}
