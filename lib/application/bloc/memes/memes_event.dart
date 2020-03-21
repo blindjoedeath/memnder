@@ -43,3 +43,5 @@ class AuthenticationChanged extends MemesEvent{
 
   const AuthenticationChanged({@required this.state});
 }
+
+class MemesEndedEvent extends MemesEvent{}

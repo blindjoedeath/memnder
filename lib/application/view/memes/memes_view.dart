@@ -1,8 +1,5 @@
 
 
-import 'dart:math';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_networkimage/provider.dart';
 import 'package:flutter_advanced_networkimage/transition.dart';
@@ -31,6 +28,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   MemeModel savedMeme;
   FlyAnimationController _flyController;
   ValueNotifier<bool> _imageFullyLoaded = ValueNotifier(false);
+  SwiperController _swiperController;
   int _currentImage = 0;
 
   void _setImageLoaded(bool state){
@@ -44,23 +42,27 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       _imageFullyLoaded.notifyListeners();
     }
   }
-
   @override
   void initState(){
     super.initState();
     _flyController = FlyAnimationController(
       vsync: this
     );
+    _swiperController = SwiperController();
+
+    if (widget.bloc.state is MemesEnded){
+      _requestMeme();
+    }
   }
 
   @override
   void dispose(){
     super.dispose();
     _flyController.dispose();
+    _swiperController.dispose();
   }
 
   void _resetState(){
-    _currentImage = 0;
     _setImageLoaded(false);
   }
 
@@ -77,7 +79,10 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       reaction: reaction
     ));
     await animation;
-    setState(() {});
+    setState(() {
+      _swiperController.move(0, animation: false);
+      _currentImage = 0;
+    });
   }
 
   Widget _buildFloatingRow(){
@@ -122,7 +127,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
 
   Widget _buildSwiper(MemeModel meme){
     return Swiper(
-      index: _currentImage,
+      controller: _swiperController,
       itemCount: meme.images.length,
       itemBuilder: (context, index){
         return _buildImage(meme.images[index]);
@@ -150,10 +155,17 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
         },
         fullscreenDialog: true
       )
-    );   
+    );
+    _currentImage = index;
+    await _swiperController.move(_currentImage, animation: false);
   }
 
   Widget _buildMeme(MemeModel meme){
+    if (meme.images.isEmpty){
+      meme.images.add("https://www.ajactraining.org/wp-content/uploads/2019/09/image-placeholder.jpg");
+      print("empty ${meme.id}");
+    }
+
     return GestureDetector(
       child: FlyAnimation(
         controller: _flyController,
@@ -177,7 +189,6 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   }
 
   Widget _buildBody(MemesState state){
-    print("$state  ${_flyController.isAnimating}");
     return Center(
       child: Padding(
         padding: EdgeInsets.only(top: 24, right: 12, left: 12, bottom: 88),
@@ -185,17 +196,18 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
                 (state is Loading && _flyController.isAnimating) ? _buildMeme(savedMeme) : 
                 (state is Loading) ? CircularProgressIndicator() : 
                 (state is Unauthenticated ? _buildText("Авторизуйтесь") : 
-                (state is ShowAlert ? _buildText(state.message) : null))),
+                (state is ShowAlert ? _buildText(state.message) : 
+                (state is MemesEnded ? _buildText("Мемы коничились") : Container())))),
       )
     );
   }
 
-  void requestMeme(){
+  void _requestMeme(){
     widget.bloc.add(MemeRequested());
   }
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  void showError(String message){
+  void _showError(String message){
     WidgetsBinding.instance.addPostFrameCallback((d){
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -206,7 +218,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     });
   }
 
-  void showAlert(String message){
+  void _showAlert(String message){
     WidgetsBinding.instance.addPostFrameCallback((d){
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -221,32 +233,32 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<Bloc<MemesEvent, MemesState>, MemesState>(
-        bloc: widget.bloc,
-        builder: (context, state){
-          if (state is Initial){
-            requestMeme();
-          } else if (state is ShowMeme){
-            savedMeme = state.meme;
-          } else if(state is ShowError){
-            showError(state.message);
-          }
-          return Scaffold(
-            key: _scaffoldKey,
-            appBar: AppBar(
-              title: const Text('Мемы'),
-            ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-            floatingActionButton: state is ShowMeme ? ValueListenableBuilder<bool>(
-                valueListenable: _imageFullyLoaded,
-                builder: (context, state, child){
-                  if (state){
-                    return _buildFloatingRow();
-                  }
-                  return Container();
-                },) : null,
-            body: _buildBody(state),
-          );
+      bloc: widget.bloc,
+      builder: (context, state){
+        if (state is Initial){
+          _requestMeme();
+        } else if (state is ShowMeme){
+          savedMeme = state.meme;
+        } else if(state is ShowError){
+          _showError(state.message);
         }
+        return Scaffold(
+          key: _scaffoldKey,
+          appBar: AppBar(
+            title: const Text('Мемы'),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: state is ShowMeme ? ValueListenableBuilder<bool>(
+              valueListenable: _imageFullyLoaded,
+              builder: (context, state, child){
+                if (state){
+                  return _buildFloatingRow();
+                }
+                return Container();
+              },) : null,
+          body: _buildBody(state),
+        );
+      }
     );
   }
 

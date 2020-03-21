@@ -60,7 +60,6 @@ class RouteDependencyObserver extends NavigatorObserver{
 
   @override
   void didPop(Route route, Route previousRoute) {
-    print(route.settings.name);
     _assembler.unloadNamed(route.settings.name);
     super.didPop(route, previousRoute);
   }

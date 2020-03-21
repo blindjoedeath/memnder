@@ -32,3 +32,5 @@ class ShowAlert extends MemesState{
 
   const ShowAlert({@required this.message});
 }
+
+class MemesEnded extends MemesState{}

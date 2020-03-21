@@ -41,7 +41,7 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
     if (response is Success<MemeModel>){
       add(MemeLoaded(meme: response.value));
     } else if (response is Success<String>){
-      add(MemeAlert(message: response.value));
+      add(MemesEndedEvent());
     }else if (response is Error){
       add(MemeError(
         message: response.message
@@ -80,7 +80,13 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
       yield* _mapMemeAlert(event);
     } else if (event is AuthenticationChanged){
       yield* _mapAuthenticationChanged(event);
+    } else if (event is MemesEndedEvent){
+      yield* _mapMemesEndedEvent(event);
     }
+  }
+
+  Stream<MemesState> _mapMemesEndedEvent(MemesEndedEvent event)async*{
+    yield MemesEnded();
   }
 
   Stream<MemesState> _mapAuthenticationChanged(AuthenticationChanged event)async*{
