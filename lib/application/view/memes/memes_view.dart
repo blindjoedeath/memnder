@@ -10,13 +10,15 @@ import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/entity/meme_reaction.dart';
 import 'package:memnder/application/model/meme_model.dart';
 import 'package:memnder/application/view/shared/animation/fly_animation.dart';
+import 'package:memnder/application/view/shared/controller/navigation_controller.dart';
 import 'package:memnder/application/view/shared/screen/meme_detail.dart';
 
 class MemesView extends StatefulWidget{
 
   final Bloc<MemesEvent, MemesState> bloc;
+  final NavigationController navigationController;
 
-  const MemesView({@required this.bloc});
+  const MemesView({@required this.bloc, this.navigationController});
 
   @override
   State<StatefulWidget> createState() => _MemesViewState();
@@ -42,6 +44,14 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       _imageFullyLoaded.notifyListeners();
     }
   }
+
+  void _navigationListener(){
+    if (widget.bloc.state is MemesEnded){
+      print("Request in listnee");
+      _requestMeme();
+    }
+  }
+
   @override
   void initState(){
     super.initState();
@@ -49,6 +59,8 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       vsync: this
     );
     _swiperController = SwiperController();
+
+    widget.navigationController?.addListener(_navigationListener);
 
     if (widget.bloc.state is MemesEnded){
       _requestMeme();
@@ -60,6 +72,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     super.dispose();
     _flyController.dispose();
     _swiperController.dispose();
+    widget.navigationController?.removeListener(_navigationListener);
   }
 
   void _resetState(){

@@ -10,15 +10,18 @@ import 'package:memnder/application/bloc/account/account_state.dart';
 import 'package:memnder/application/manager/route/route_manager.dart';
 import 'package:memnder/application/model/meme_model.dart';
 import 'package:memnder/application/view/shared/button/sign_button.dart';
+import 'package:memnder/application/view/shared/controller/navigation_controller.dart';
 import 'package:memnder/application/view/shared/screen/meme_detail.dart';
 
 class AccountView extends StatefulWidget{
 
   final Bloc<AccountEvent, AccountState> bloc;
+  final NavigationController navigationController;
 
   const AccountView(
     {
-      @required this.bloc
+      @required this.bloc,
+      this.navigationController
     }
   );
 
@@ -45,17 +48,23 @@ class _AccountViewState extends State<AccountView>{
      });
   }
 
+  void _navigationListener(){
+    widget.bloc.add(MemesRequested());
+  }
+
   @override
   void initState(){
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
+    widget.navigationController?.addListener(_navigationListener);
   }
 
   @override
   void dispose(){
     super.dispose();
     _scrollController.removeListener(_scrollListener);
+    widget.navigationController?.removeListener(_navigationListener);
   }
 
   Widget _buildImage(String image){

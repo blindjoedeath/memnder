@@ -15,6 +15,7 @@ import 'package:memnder/application/manager/route/route_observer.dart';
 import 'package:memnder/application/view/account/account_view.dart';
 import 'package:memnder/application/view/authentication/authentication_view.dart';
 import 'package:memnder/application/view/memes/memes_view.dart';
+import 'package:memnder/application/view/shared/controller/navigation_controller.dart';
 
 class AppView extends StatefulWidget{ 
   final Lazy<Bloc<MemesEvent, MemesState>> memesBloc;
@@ -37,25 +38,29 @@ class AppView extends StatefulWidget{
 class _AppViewState extends State<AppView>{
 
   int index = 0;
+  final NavigationController _navigationController = NavigationController();
 
   Widget _buildThirdTab(){
     return AccountView(
-      bloc: widget.accountBloc.instance
+      bloc: widget.accountBloc.instance,
+      navigationController: _navigationController,
     );
   }
 
   Future _showSecondTab()async{
     await RouteManager.prepareNamed("/app/load_meme");
-    Navigator.pushNamed(context, "/app/load_meme",
+    await Navigator.pushNamed(context, "/app/load_meme",
       arguments: {
         RouteKey.routeType : RouteType.modal
       });
+    _navigationController.navigatorPopped();
   }
 
   Future<Widget> _buildFirstTab()async{
     await RouteManager.prepareNamed("/app/memes");
     return MemesView(
-      bloc: widget.memesBloc.instance
+      bloc: widget.memesBloc.instance,
+      navigationController: _navigationController,
     );
   }
 
