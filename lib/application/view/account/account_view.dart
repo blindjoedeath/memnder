@@ -30,9 +30,14 @@ class AccountView extends StatefulWidget{
 
 }
 
+class _IndexModel{
+  int index = 0;
+  SwiperController swiperController = SwiperController();
+}
+
 class _AccountViewState extends State<AccountView>{
 
-  Map<MemeModel, int> _indexes = Map<MemeModel, int>();
+  Map<MemeModel, _IndexModel> _indexes = Map<MemeModel, _IndexModel>();
   ScrollController _scrollController;
   bool _isScrolled = false;
   List<MemeModel> _memes;
@@ -63,6 +68,7 @@ class _AccountViewState extends State<AccountView>{
   @override
   void dispose(){
     super.dispose();
+    widget.bloc.add(AccountClosed());
     _scrollController.removeListener(_scrollListener);
     widget.navigationController?.removeListener(_navigationListener);
   }
@@ -74,9 +80,7 @@ class _AccountViewState extends State<AccountView>{
       image: AdvancedNetworkImage(
         image,
       ),
-      placeholder: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(Colors.blue),
-      )
+      placeholder: CircularProgressIndicator()
     );
   }
 
@@ -85,12 +89,13 @@ class _AccountViewState extends State<AccountView>{
       return SizedBox(
         height: 256,
         child: Swiper(
+          controller: _indexes[meme].swiperController,
           itemCount: meme.images.length,
           itemBuilder: (context, i){
             return _buildImage(meme.images[i]);
           },
           loop: false,
-          onIndexChanged: (i) => _indexes[meme] = i,
+          onIndexChanged: (i) => _indexes[meme].index = i,
           pagination: SwiperPagination(
             margin: EdgeInsets.all(5),
             builder: DotSwiperPaginationBuilder(
@@ -137,7 +142,9 @@ class _AccountViewState extends State<AccountView>{
         },
         fullscreenDialog: true
       )
-    );   
+    );
+    _indexes[meme].index = received;
+    await _indexes[meme].swiperController.move(received, animation: false);   
   }
 
   Widget _buildMemePost(MemeModel meme){
@@ -149,7 +156,7 @@ class _AccountViewState extends State<AccountView>{
             onTap: (){
               var index = 0;
               if (_indexes.containsKey(meme)){
-                index = _indexes[meme];
+                index = _indexes[meme].index;
               }
               _showDetail(meme, index);
             },
@@ -164,7 +171,11 @@ class _AccountViewState extends State<AccountView>{
     return ListView.builder(
       controller: _scrollController,
       itemBuilder: (context, i){
-        return _buildMemePost(memes[i]);
+        var meme = memes[i];
+        if (!_indexes.containsKey(meme)){
+          _indexes[meme] = _IndexModel();
+        }
+        return _buildMemePost(meme);
       },
       itemCount: memes.length,
     );
@@ -185,6 +196,7 @@ class _AccountViewState extends State<AccountView>{
         } else if (state is Loading){
           return _buildLoading();
         } else if (state is LoadedMemes && state.memes.length > 0){
+          _isScrolled = false;
           _memes = state.memes;
           return _buildList(_memes);
         } else if (state is MoreLoadedMemes){
@@ -195,7 +207,7 @@ class _AccountViewState extends State<AccountView>{
         return Center(
           child: Text(
             "Загруженные мемы",
-            style: Theme.of(context).textTheme.display1,
+            style: Theme.of(context).textTheme.display1.copyWith(fontSize: 32)
           )
         );
       }

@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:memnder/application/bloc/memes/memes_event.dart';
 import 'package:memnder/application/model/meme_model.dart';
+import 'package:memnder/application/view/shared/swipeable/image_preloader.dart';
 import 'package:meta/meta.dart';
 
 abstract class MemesState extends Equatable {
@@ -15,10 +17,10 @@ class Unauthenticated extends MemesState{}
 
 class Loading extends MemesState{}
 
-class ShowMeme extends MemesState{
+class MemeNeedToPrecache extends MemesState{
   final MemeModel meme;
 
-  const ShowMeme({@required this.meme});
+  const MemeNeedToPrecache({@required this.meme});
 }
 
 class ShowError extends MemesState{
@@ -34,3 +36,10 @@ class ShowAlert extends MemesState{
 }
 
 class MemesEnded extends MemesState{}
+
+class ShowMeme extends MemesState{
+  final List<PreloadedImage> images;
+  final MemeModel meme;
+
+  const ShowMeme({@required this.images, @required this.meme});
+}

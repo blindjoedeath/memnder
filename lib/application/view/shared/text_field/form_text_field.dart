@@ -21,7 +21,7 @@ class FormTextField extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(right: 56, left: 56),
+      width: 256,
       child: TextField(
         controller: controller,
         keyboardType: inputType,

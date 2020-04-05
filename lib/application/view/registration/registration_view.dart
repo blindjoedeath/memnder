@@ -43,7 +43,7 @@ class _RegistrationViewState extends State<RegistrationView>{
     if (state is RegistrationValidationError){
       errors[state.field] = state.errorMessage;
     }
-    return ListView(
+    return Column(
       children: <Widget>[
         SizedBox(
           height: 56,
@@ -110,6 +110,7 @@ class _RegistrationViewState extends State<RegistrationView>{
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(title: Text("Регистрация"),),
+      resizeToAvoidBottomPadding: false,
       body: BlocBuilder<Bloc<RegistrationEvent, RegistrationState>, RegistrationState>(
         bloc: widget.bloc,
         builder: (context, state){

@@ -11,7 +11,12 @@ import 'package:memnder/application/entity/meme_reaction.dart';
 import 'package:memnder/application/model/meme_model.dart';
 import 'package:memnder/application/view/shared/animation/fly_animation.dart';
 import 'package:memnder/application/view/shared/controller/navigation_controller.dart';
+import 'package:memnder/application/view/shared/indicator/rjuman_spinner.dart';
+import 'package:memnder/application/view/shared/route/fade_route.dart';
 import 'package:memnder/application/view/shared/screen/meme_detail.dart';
+import 'package:memnder/application/view/shared/swipeable/draggable_card.dart';
+import 'package:memnder/application/view/shared/swipeable/image_preloader.dart';
+import 'package:memnder/application/view/shared/swipeable/swipeable_card.dart';
 
 class MemesView extends StatefulWidget{
 
@@ -27,27 +32,10 @@ class MemesView extends StatefulWidget{
 
 class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMixin{
 
-  MemeModel savedMeme;
-  FlyAnimationController _flyController;
-  ValueNotifier<bool> _imageFullyLoaded = ValueNotifier(false);
-  SwiperController _swiperController;
-  int _currentImage = 0;
-
-  void _setImageLoaded(bool state){
-    if (state){
-      WidgetsBinding.instance.addPostFrameCallback((r){
-        _imageFullyLoaded.value = state;
-        _imageFullyLoaded.notifyListeners();
-      });
-    } else{
-      _imageFullyLoaded.value = state;
-      _imageFullyLoaded.notifyListeners();
-    }
-  }
+  int _currentIndex = 0;
 
   void _navigationListener(){
     if (widget.bloc.state is MemesEnded){
-      print("Request in listnee");
       _requestMeme();
     }
   }
@@ -55,10 +43,6 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   @override
   void initState(){
     super.initState();
-    _flyController = FlyAnimationController(
-      vsync: this
-    );
-    _swiperController = SwiperController();
 
     widget.navigationController?.addListener(_navigationListener);
 
@@ -70,149 +54,7 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
   @override
   void dispose(){
     super.dispose();
-    _flyController.dispose();
-    _swiperController.dispose();
     widget.navigationController?.removeListener(_navigationListener);
-  }
-
-  void _resetState(){
-    _setImageLoaded(false);
-  }
-
-  void _setReaction(MemeReaction reaction)async{
-    _resetState();
-    _flyController.direction = FlyAnimationDirection.left;
-    if (reaction == MemeReaction.like){
-      _flyController.direction = FlyAnimationDirection.right;
-    }
-    var animation = _flyController.forward();
-
-    widget.bloc.add(MemeReactionSet(
-      meme: savedMeme,
-      reaction: reaction
-    ));
-    await animation;
-    setState(() {
-      _swiperController.move(0, animation: false);
-      _currentImage = 0;
-    });
-  }
-
-  Widget _buildFloatingRow(){
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        FloatingActionButton.extended(
-          onPressed: () => _setReaction(MemeReaction.skip),
-          label: Text('Пропустить'),
-          icon: Icon(Icons.navigate_next),
-          backgroundColor: Colors.black45,
-          heroTag: null,
-        ),
-        FloatingActionButton.extended(
-          onPressed: () => _setReaction(MemeReaction.like),
-          label: Text('     Лайк     '),
-          icon: Icon(Icons.thumb_up),
-          backgroundColor: Colors.green,
-          heroTag: null,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildImage(String link){
-    return TransitionToImage(
-      fit: BoxFit.contain,
-      image: AdvancedNetworkImage(
-        link,
-      ),
-      placeholder: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(Colors.green),
-      ),
-      loadedCallback: (){
-        _setImageLoaded(true);
-        WidgetsBinding.instance.addPostFrameCallback((d){
-          _flyController.reset();
-        });
-      },
-    );
-  }
-
-  Widget _buildSwiper(MemeModel meme){
-    return Swiper(
-      controller: _swiperController,
-      itemCount: meme.images.length,
-      itemBuilder: (context, index){
-        return _buildImage(meme.images[index]);
-      },
-      onIndexChanged: (i) => _currentImage = i,
-      loop: false,
-      pagination: SwiperPagination(
-        margin: EdgeInsets.all(5),
-        builder: DotSwiperPaginationBuilder(
-          color: Colors.grey,
-          activeColor: Colors.blue,
-        )
-      ),
-    );
-  }
-
-  void _showDetail(MemeModel meme)async{
-    int index = await Navigator.push(context,
-      MaterialPageRoute(
-        builder: (context){
-          return MemeDetail(
-            images: meme.images,
-            initialPage: _currentImage,
-          );
-        },
-        fullscreenDialog: true
-      )
-    );
-    _currentImage = index;
-    await _swiperController.move(_currentImage, animation: false);
-  }
-
-  Widget _buildMeme(MemeModel meme){
-    if (meme.images.isEmpty){
-      meme.images.add("https://www.ajactraining.org/wp-content/uploads/2019/09/image-placeholder.jpg");
-      print("empty ${meme.id}");
-    }
-
-    return GestureDetector(
-      child: FlyAnimation(
-        controller: _flyController,
-        child: SizedBox(
-          width: double.infinity,
-          height: 300,
-          child: meme.images.length > 1 ? _buildSwiper(meme) 
-                                      : _buildImage(meme.images[0])
-        )
-      ),
-      onTapUp: (d){
-        _showDetail(meme);
-      },
-    );
-  }
-
-  Widget _buildText(String text){
-    return Text(text, 
-      style: Theme.of(context).textTheme.display1,
-    ); 
-  }
-
-  Widget _buildBody(MemesState state){
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.only(top: 24, right: 12, left: 12, bottom: 88),
-        child:  (state is ShowMeme ? _buildMeme(state.meme) : 
-                (state is Loading && _flyController.isAnimating) ? _buildMeme(savedMeme) : 
-                (state is Loading) ? CircularProgressIndicator() : 
-                (state is Unauthenticated ? _buildText("Авторизуйтесь") : 
-                (state is ShowAlert ? _buildText(state.message) : 
-                (state is MemesEnded ? _buildText("Мемы коничились") : Container())))),
-      )
-    );
   }
 
   void _requestMeme(){
@@ -242,6 +84,73 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
     });
   }
 
+  void _precacheMeme(MemeNeedToPrecache state)async{
+    _currentIndex = 0;
+    var images = await ImagePreloader.preload(state.meme.images);
+    widget.bloc.add(PrecachedImages(meme: state.meme, preloaded: images));
+  }
+
+  void _showDetail(MemeModel meme){
+    Navigator.push(context, 
+      FadeRoute(
+        pageBuilder: (c, a1, a2) => MemeDetail(
+          images: meme.images,
+          initialPage: _currentIndex,
+          indexChanged: (i) => setState(() => _currentIndex = i),
+        ),
+      )
+    );
+  }
+
+  void _setMemeReaction(MemeModel meme, SlideDirection direction){
+    var reaction = direction == SlideDirection.left ? MemeReaction.skip : MemeReaction.like;
+    widget.bloc.add(MemeReactionSet(meme: meme, reaction: reaction));
+  }
+
+  Widget _buildMemeCard(ShowMeme state){
+    return Align(
+      alignment: Alignment.center,
+      child: SwipeableCard(
+        images: state.images,
+        indexChanged: (i) => _currentIndex = i,
+        initialIndex: _currentIndex,
+        onSlide: (direction){
+          if (direction == SlideDirection.down){
+            _showDetail(state.meme);
+          } else{
+            _setMemeReaction(state.meme, direction);
+          }
+        },
+      )
+    );
+  }
+
+  Widget _buildSpinner(){
+    return Center(
+      child: RjumanSpinner()
+    );
+  }
+
+  Widget _buildMemesEnded(){
+    return Center(
+      child: Text(
+        "Мемы кончились",
+        style: Theme.of(context).textTheme.display1.copyWith(fontSize: 32)
+      ) 
+    );
+  }
+
+  Widget _buildBody(MemesState state){
+    if (state is ShowMeme){
+      return _buildMemeCard(state);
+    } else if(state is Loading || state is MemeNeedToPrecache){
+      return _buildSpinner();
+    } else if (state is MemesEnded){
+      return _buildMemesEnded();
+    }
+    return Container();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -250,25 +159,14 @@ class _MemesViewState extends State<MemesView> with SingleTickerProviderStateMix
       builder: (context, state){
         if (state is Initial){
           _requestMeme();
-        } else if (state is ShowMeme){
-          savedMeme = state.meme;
         } else if(state is ShowError){
           _showError(state.message);
+        } else if (state is MemeNeedToPrecache){
+          _precacheMeme(state);
         }
         return Scaffold(
           key: _scaffoldKey,
-          appBar: AppBar(
-            title: const Text('Мемы'),
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: state is ShowMeme ? ValueListenableBuilder<bool>(
-              valueListenable: _imageFullyLoaded,
-              builder: (context, state, child){
-                if (state){
-                  return _buildFloatingRow();
-                }
-                return Container();
-              },) : null,
+          backgroundColor: Color.fromARGB(100, 219, 207, 255),
           body: _buildBody(state),
         );
       }

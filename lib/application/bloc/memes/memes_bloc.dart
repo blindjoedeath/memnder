@@ -82,7 +82,13 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
       yield* _mapAuthenticationChanged(event);
     } else if (event is MemesEndedEvent){
       yield* _mapMemesEndedEvent(event);
+    } else if (event is PrecachedImages){
+      yield * _mapPrecachedImages(event);
     }
+  }
+
+  Stream<MemesState> _mapPrecachedImages(PrecachedImages event)async*{
+    yield ShowMeme(images: event.preloaded, meme: event.meme);
   }
 
   Stream<MemesState> _mapMemesEndedEvent(MemesEndedEvent event)async*{
@@ -106,7 +112,7 @@ class MemesBloc extends Bloc<MemesEvent, MemesState>{
   }
 
   Stream<MemesState> _mapMemeLoaded(MemeLoaded event)async*{
-    yield ShowMeme(
+    yield MemeNeedToPrecache(
       meme: event.meme
     );
   }

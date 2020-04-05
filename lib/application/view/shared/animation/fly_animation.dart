@@ -15,7 +15,7 @@ class FlyAnimationController extends AnimationController{
       @required TickerProvider vsync
     }
   ) : super(
-    duration: Duration(milliseconds: 500),
+    duration: Duration(milliseconds: 250),
     vsync: vsync
   );
 
@@ -49,7 +49,7 @@ class _FlyAnimationState extends State<FlyAnimation> with SingleTickerProviderSt
     double sign = widget.controller.direction == FlyAnimationDirection.left ? -1 : 1;
     return Tween<Offset>(
       begin: const Offset(0, 0),
-      end: Offset(sign * 2, 0.1),
+      end: Offset(sign * 1, 0.1),
     ).animate(_curve);
   }
 

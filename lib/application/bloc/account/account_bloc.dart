@@ -72,7 +72,13 @@ class AccountBloc extends Bloc<AccountEvent, AccountState>{
       yield* _mapMoreRequested(event);
     } else if (event is LoadingMoreSuccess){
       yield* _mapMoreLoadedMemes(event);
+    } else if (event is AccountClosed){
+      yield* _mapAccountClosed(event);
     }
+  }
+
+  Stream<AccountState> _mapAccountClosed(AccountClosed event) async* {
+    yield Initial();
   }
 
   Stream<AccountState> _mapMoreLoadedMemes(LoadingMoreSuccess event) async* {

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:memnder/application/entity/meme_reaction.dart';
 import 'package:memnder/application/model/meme_model.dart';
+import 'package:memnder/application/view/shared/swipeable/image_preloader.dart';
 import 'package:meta/meta.dart';
 
 abstract class MemesEvent extends Equatable {
@@ -45,3 +46,10 @@ class AuthenticationChanged extends MemesEvent{
 }
 
 class MemesEndedEvent extends MemesEvent{}
+
+class PrecachedImages extends MemesEvent{
+  final List<PreloadedImage> preloaded;
+  final MemeModel meme;
+
+  const PrecachedImages({@required this.preloaded, @required this.meme});
+}

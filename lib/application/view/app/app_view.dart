@@ -6,14 +6,11 @@ import 'package:memnder/application/bloc/account/account_state.dart';
 import 'package:memnder/application/bloc/memes/memes_event.dart';
 import 'package:memnder/application/bloc/memes/memes_state.dart';
 import 'package:memnder/application/entity/lazy.dart';
-import 'package:memnder/application/bloc/authentication/authentication_event.dart';
-import 'package:memnder/application/bloc/authentication/authentication_state.dart';
 import 'package:memnder/application/bloc/app/app_event.dart';
 import 'package:memnder/application/bloc/app/app_state.dart';
 import 'package:memnder/application/manager/route/route_manager.dart';
 import 'package:memnder/application/manager/route/route_observer.dart';
 import 'package:memnder/application/view/account/account_view.dart';
-import 'package:memnder/application/view/authentication/authentication_view.dart';
 import 'package:memnder/application/view/memes/memes_view.dart';
 import 'package:memnder/application/view/shared/controller/navigation_controller.dart';
 
@@ -39,7 +36,7 @@ class _AppViewState extends State<AppView>{
 
   int index = 0;
   final NavigationController _navigationController = NavigationController();
-
+  
   Widget _buildThirdTab(){
     return AccountView(
       bloc: widget.accountBloc.instance,

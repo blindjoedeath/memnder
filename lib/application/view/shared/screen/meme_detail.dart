@@ -6,11 +6,15 @@ class MemeDetail extends StatefulWidget{
 
   final List<String> images;
   final int initialPage;
+  final Function(int) indexChanged;
+  final Color backgroundColor;
 
   const MemeDetail(
     {
       @required this.images,
-      this.initialPage = 0
+      this.initialPage = 0,
+      this.indexChanged,
+      this.backgroundColor = Colors.black
     }
   );
 
@@ -45,13 +49,21 @@ class _MemeDetailState extends State<MemeDetail>{
           return PhotoViewGalleryPageOptions(
             imageProvider: NetworkImage(widget.images[index]),
             initialScale: PhotoViewComputedScale.contained,
-            filterQuality: FilterQuality.high,
+            filterQuality: FilterQuality.high, 
             maxScale: PhotoViewComputedScale.contained * 2,
             minScale: PhotoViewComputedScale.contained,
-            basePosition: Alignment.center
+            basePosition: Alignment.center,
+            heroAttributes: PhotoViewHeroAttributes(
+              tag: "swipeHero$index"
+            )
           );
         },    
-        onPageChanged: (i) => _currentIndex = i,
+        onPageChanged: (i){
+          _currentIndex = i;
+          if (widget.indexChanged != null){
+            widget.indexChanged(i);
+          }
+        },
         pageController: _controller,
         itemCount: widget.images.length,
         loadingBuilder: (context, event) => Center(
@@ -66,7 +78,7 @@ class _MemeDetailState extends State<MemeDetail>{
           ),
         ),
         backgroundDecoration: BoxDecoration(
-          color: Colors.black         
+          color: widget.backgroundColor        
         ),
       ),
       onTap: (){

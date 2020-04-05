@@ -41,3 +41,5 @@ class LoadingMoreSuccess extends AccountEvent{
 }
 
 class MoreMemesRequested extends AccountEvent{}
+
+class AccountClosed extends AccountEvent{}

@@ -11,8 +11,8 @@ class SignButton extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(right: 72, left: 72),
+    return SizedBox(
+      width: 212,
       child: MaterialButton(
         onPressed: onPressed,
         child: Text(title),

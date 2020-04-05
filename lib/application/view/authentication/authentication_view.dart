@@ -66,7 +66,7 @@ class _AuthenticationViewState extends State<AuthenticationView>{
       if (state is AuthenticationValidationError){
         errors[state.field] = state.errorMessage;
       }
-      return ListView(
+      return Column(
         children: <Widget>[
           SizedBox(
             height: 56,
@@ -106,6 +106,7 @@ class _AuthenticationViewState extends State<AuthenticationView>{
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(title: Text("Аутентификация"),),
+      resizeToAvoidBottomPadding: false,
       body: BlocBuilder<Bloc<AuthenticationEvent, AuthenticationState>, AuthenticationState>(
         bloc: widget.bloc,
         builder: (context, state){

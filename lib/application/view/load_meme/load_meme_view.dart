@@ -146,7 +146,7 @@ class _LoadMemeViewState extends State<LoadMemeView>{
         return _images.isEmpty ? Center(
           child: Text(
             "Загрузите мемы",
-            style: Theme.of(context).textTheme.display1,
+            style: Theme.of(context).textTheme.display1.copyWith(fontSize: 32)
           ) 
         ) : _buildGridView();
       },
